@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://citj060xrvky2"]
+
+[ext_resource type="PackedScene" uid="uid://muh3uky7ssmy" path="res://src/rooms/floor_1.tscn" id="1_2tcv4"]
+[ext_resource type="PackedScene" uid="uid://b6kpwn4wc7euw" path="res://src/rooms/floor_2.tscn" id="2_65fqg"]
+[ext_resource type="PackedScene" uid="uid://bey3v2tgq1dvw" path="res://src/rooms/floor_3.tscn" id="3_ajcsk"]
+[ext_resource type="PackedScene" uid="uid://b5c5oa431eod" path="res://src/rooms/floor_4.tscn" id="4_0iijo"]
+
+[node name="Building" type="Node3D" unique_id=801263441]
+
+[node name="Floor4" parent="." unique_id=517736597 instance=ExtResource("4_0iijo")]
+
+[node name="Floor3" parent="." unique_id=1453096537 instance=ExtResource("3_ajcsk")]
+
+[node name="Floor2" parent="." unique_id=255143269 instance=ExtResource("2_65fqg")]
+
+[node name="Floor1" parent="." unique_id=1810396351 instance=ExtResource("1_2tcv4")]

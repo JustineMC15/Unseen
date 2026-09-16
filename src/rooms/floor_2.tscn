@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://b6kpwn4wc7euw"]
+
+[node name="Floor2" type="CSGCombiner3D" unique_id=104980853]
