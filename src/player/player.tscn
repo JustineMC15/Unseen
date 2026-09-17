@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://ccfsqp0kteono"]
+
+[ext_resource type="Script" uid="uid://84v2jlr6uxlk" path="res://src/player/player.gd" id="1_rxibo"]
+[ext_resource type="Script" uid="uid://dx080dxfk1hiv" path="res://src/player/player_gaze_caster.gd" id="2_mf2ua"]
+[ext_resource type="Script" uid="uid://c5elp4282o12e" path="res://src/player/concealment.gd" id="2_rxibo"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
+radius = 0.4
+height = 1.8
+
+[node name="Player" type="CharacterBody3D" unique_id=1715769690]
+script = ExtResource("1_rxibo")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1202851483]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.099999964, 0)
+shape = SubResource("CapsuleShape3D_vlew8")
+
+[node name="Head" type="Node3D" parent="." unique_id=1457436616]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head" unique_id=390478342]
+script = ExtResource("2_mf2ua")
+
+[node name="Hide" type="Node" parent="." unique_id=427031145]
+script = ExtResource("2_rxibo")

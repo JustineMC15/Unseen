@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://cbyxqy5odeip3"]
+
+[ext_resource type="Script" uid="uid://bw3mjwlegjcg1" path="res://src/entity/entity_perception.gd" id="1_51ugx"]
+[ext_resource type="Script" uid="uid://fbm8k1w0rr0l" path="res://src/entity/ai_state_machine.gd" id="2_0bfa1"]
+[ext_resource type="Script" uid="uid://npcqqniv8qm" path="res://src/entity/states/patrol_state.gd" id="3_kpt7s"]
+[ext_resource type="Script" uid="uid://ba2n53otajy21" path="res://src/entity/states/detect_state.gd" id="4_bb53b"]
+[ext_resource type="Script" uid="uid://b2aqr0cdqlp00" path="res://src/entity/states/chase_state.gd" id="5_vl4tv"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
+height = 3.0
+
+[node name="Unseen" type="CharacterBody3D" unique_id=1752703208]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1997416813]
+shape = SubResource("CapsuleShape3D_vlew8")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=484813096]
+
+[node name="Eyes" type="Node3D" parent="." unique_id=1575763648]
+
+[node name="Perception" type="Node" parent="." unique_id=1833831182]
+script = ExtResource("1_51ugx")
+
+[node name="StateMachine" type="Node" parent="." unique_id=772967196]
+script = ExtResource("2_0bfa1")
+
+[node name="Patrol" type="Node" parent="StateMachine" unique_id=181983688]
+script = ExtResource("3_kpt7s")
+
+[node name="Detect" type="Node" parent="StateMachine" unique_id=482587686]
+script = ExtResource("4_bb53b")
+
+[node name="Chase" type="Node" parent="StateMachine" unique_id=502200495]
+script = ExtResource("5_vl4tv")
