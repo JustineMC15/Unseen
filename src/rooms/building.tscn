@@ -8,9 +8,12 @@
 [node name="Building" type="Node3D" unique_id=801263441]
 
 [node name="Floor4" parent="." unique_id=517736597 instance=ExtResource("4_0iijo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.523798, 0)
 
 [node name="Floor3" parent="." unique_id=1453096537 instance=ExtResource("3_ajcsk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.768551, 0)
 
 [node name="Floor2" parent="." unique_id=255143269 instance=ExtResource("2_65fqg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
 [node name="Floor1" parent="." unique_id=1810396351 instance=ExtResource("1_2tcv4")]
