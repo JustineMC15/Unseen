@@ -20,6 +20,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=390478342]
 script = ExtResource("2_mf2ua")
+gaze_half_angle_deg = 8.0
 
 [node name="Hide" type="Node" parent="." unique_id=427031145]
 script = ExtResource("2_rxibo")

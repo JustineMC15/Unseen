@@ -1,7 +1,5 @@
 [gd_scene format=3 uid="uid://b6kpwn4wc7euw"]
 
-[ext_resource type="PackedScene" uid="uid://ccfsqp0kteono" path="res://src/player/player.tscn" id="1_3xpkc"]
-
 [node name="Floor2" type="CSGCombiner3D" unique_id=104980853]
 use_collision = true
 
@@ -1642,9 +1640,6 @@ transform = Transform3D(1, 0, 0, 0, -0.50000006, 0.8660254, 0, -0.8660254, -0.50
 [node name="DirectionalLight3D4" type="DirectionalLight3D" parent="." unique_id=963856185]
 transform = Transform3D(1, 0, 0, 0, -0.50000006, 0.8660254, 0, -0.8660254, -0.50000006, -5, 6, -2)
 
-[node name="Player" parent="." unique_id=1715769690 instance=ExtResource("1_3xpkc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 3, -23.116299)
-
 [node name="pathway" type="CSGBox3D" parent="." unique_id=528645010]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.181164, 0.05792117, 6.6819916)
 size = Vector3(6.4138184, 0.105041504, 72.62082)
@@ -2381,5 +2376,3 @@ size = Vector3(4.9430175, 0.231, 1.078)
 transform = Transform3D(1.0000002, 0, -9.313226e-10, 0, 1, 0, 9.313226e-10, 0, 1.0000002, -1.8709335, 4.326272, -2.1722946)
 use_collision = true
 size = Vector3(5.002887, 0.231, 1.078)
-
-[editable path="Player"]

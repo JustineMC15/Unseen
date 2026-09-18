@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://cbyxqy5odeip3"]
 
+[ext_resource type="Script" uid="uid://cijn8v7cv0jsm" path="res://src/entity/ai_entity.gd" id="1_0bfa1"]
 [ext_resource type="Script" uid="uid://bw3mjwlegjcg1" path="res://src/entity/entity_perception.gd" id="1_51ugx"]
 [ext_resource type="Script" uid="uid://fbm8k1w0rr0l" path="res://src/entity/ai_state_machine.gd" id="2_0bfa1"]
 [ext_resource type="Script" uid="uid://npcqqniv8qm" path="res://src/entity/states/patrol_state.gd" id="3_kpt7s"]
@@ -9,17 +10,24 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 height = 3.0
 
-[node name="Unseen" type="CharacterBody3D" unique_id=1752703208]
+[node name="Unseen" type="CharacterBody3D" unique_id=1752703208 node_paths=PackedStringArray("perception", "state_machine", "nav_agent")]
+script = ExtResource("1_0bfa1")
+perception = NodePath("Perception")
+state_machine = NodePath("StateMachine")
+nav_agent = NodePath("NavigationAgent3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1997416813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 shape = SubResource("CapsuleShape3D_vlew8")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=484813096]
 
 [node name="Eyes" type="Node3D" parent="." unique_id=1575763648]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
 
-[node name="Perception" type="Node" parent="." unique_id=1833831182]
+[node name="Perception" type="Node" parent="." unique_id=1833831182 node_paths=PackedStringArray("eyes")]
 script = ExtResource("1_51ugx")
+eyes = NodePath("../Eyes")
 
 [node name="StateMachine" type="Node" parent="." unique_id=772967196]
 script = ExtResource("2_0bfa1")

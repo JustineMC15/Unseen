@@ -16,8 +16,6 @@ func _physics_process(delta: float) -> void:
 		delta
 	)
 
-## NavigationAgent3D resolves the path; states just say where they
-## want to go and how fast.
 func move_towards(target_position: Vector3, speed: float) -> void:
 	nav_agent.target_position = target_position
 	if nav_agent.is_navigation_finished():
@@ -29,7 +27,6 @@ func move_towards(target_position: Vector3, speed: float) -> void:
 		velocity = direction.normalized() * speed
 	move_and_slide()
 
-## Turn-to-face without moving — used for Patrol's "flinch" reaction.
 func face_towards(target_position: Vector3, turn_speed: float, delta: float) -> void:
 	var flat_target := target_position
 	flat_target.y = global_position.y
