@@ -56,8 +56,6 @@ func _can_hit_target(target: Node3D) -> bool:
 		global_position + (-global_transform.basis.z) * max_gaze_distance
 	)
 
-	query.collide_with_areas = true
-
 	var player := get_parent()
 	query.exclude = [player]
 

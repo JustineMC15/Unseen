@@ -31,7 +31,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.256703, 12.980419, 37.315674)
 
 [node name="Unseen" parent="." unique_id=1752703208 instance=ExtResource("6_0iijo")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.41846, 11.587562, 26.545856)
+transform = Transform3D(0.99999857, 0.0011693077, -0.0012099539, -0.0011628388, 0.9999851, 0.00532578, 0.0012161724, -0.0053243632, 0.99998504, -16.41846, 11.587562, 26.545856)
 
 [node name="NavigationAgent3D" parent="Unseen" index="1" unique_id=484813096]
 path_desired_distance = 0.5
