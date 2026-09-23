@@ -17,13 +17,13 @@ polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Arr
 navigation_mesh = SubResource("NavigationMesh_vlew8")
 
 [node name="Floor4" parent="NavigationRegion3D" unique_id=517736597 instance=ExtResource("4_0iijo")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.523798, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.313309, 0)
 
 [node name="Floor3" parent="NavigationRegion3D" unique_id=1453096537 instance=ExtResource("3_ajcsk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.768551, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.03733349, 9.52163, 0.013794899)
 
 [node name="Floor2" parent="NavigationRegion3D" unique_id=255143269 instance=ExtResource("2_65fqg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.7895107, 0)
 
 [node name="Floor1" parent="NavigationRegion3D" unique_id=1810396351 instance=ExtResource("1_2tcv4")]
 
