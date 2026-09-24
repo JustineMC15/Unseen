@@ -4,6 +4,7 @@ extends AIState
 @export var confirm_time: float = 1.5
 @export var give_up_time: float = 3.0
 @export var move_speed: float = 3.0
+@export var turn_speed: float = 5.0
 
 var _confirm_timer: float = 0.0
 var _give_up_timer: float = 0.0
@@ -14,8 +15,9 @@ func enter() -> void:
 	_give_up_timer = 0.0
 	_last_known_position = entity.perception.player.global_position
 
-func physics_update(_delta: float) -> void:
+func physics_update(delta: float) -> void:
 	entity.move_towards(_last_known_position, move_speed)
+	entity.face_towards(_last_known_position, turn_speed, delta)
 
 func on_perception_updated(can_see_player: bool, delta: float) -> void:
 	if can_see_player:

@@ -1406,10 +1406,12 @@ size = Vector3(0.35, 4, 10)
 
 [node name="pathway" type="CSGBox3D" parent="." unique_id=1683912769]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.181164, 0.05792117, 6.6819916)
+use_collision = true
 size = Vector3(6.4138184, 0.105041504, 72.62082)
 
 [node name="pathway3" type="CSGBox3D" parent="." unique_id=428240585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.057869, 0.05792117, 30.325947)
+use_collision = true
 size = Vector3(17.524628, 0.105041504, 8.2887335)
 
 [node name="Stairway" type="Node3D" parent="." unique_id=1689408264]
@@ -1795,6 +1797,7 @@ transform = Transform3D(-0.9999913, 0, 0.0041510444, 0, 1, 0, -0.0041510444, 0, 
 
 [node name="pathway3" type="CSGBox3D" parent="Stairway2" unique_id=144850903]
 transform = Transform3D(-0.99999154, 0, -0.0041510453, 0, 1, 0, 0.0041510453, 0, -0.99999154, -0.48768997, -0.37994707, -0.7551689)
+use_collision = true
 size = Vector3(2.166273, 0.105041504, 3.7639956)
 
 [node name="CSGBox3D" type="CSGBox3D" parent="Stairway2" unique_id=1254595388]

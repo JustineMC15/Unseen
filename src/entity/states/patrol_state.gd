@@ -21,6 +21,7 @@ func physics_update(delta: float) -> void:
 	if waypoints.is_empty():
 		return
 	entity.move_towards(waypoints[_waypoint_index], move_speed)
+	entity.face_towards(waypoints[_waypoint_index], turn_speed, delta)
 	if entity.nav_agent.is_navigation_finished():
 		_waypoint_index = (_waypoint_index + 1) % waypoints.size()
 

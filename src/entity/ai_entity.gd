@@ -26,6 +26,7 @@ func move_towards(target_position: Vector3, speed: float) -> void:
 		direction.y = 0.0
 		velocity = direction.normalized() * speed
 	move_and_slide()
+	
 
 func face_towards(target_position: Vector3, turn_speed: float, delta: float) -> void:
 	var flat_target := target_position
