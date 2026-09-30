@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://d3ivk5l83gdsj"]
+
+[ext_resource type="Texture2D" uid="uid://bx4kaxssb0bv8" path="res://user_interface/main_menu/unseen_bg.jpg" id="1_aioaw"]
+[ext_resource type="Script" uid="uid://bnkq8hkht1bfw" path="res://user_interface/settings/settings.gd" id="1_m6wgb"]
+[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://user_interface/settings/stat_ft.ttf" id="2_de3xg"]
+
+[node name="Settings" type="Control" unique_id=590182021]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_m6wgb")
+
+[node name="Background" type="TextureRect" parent="." unique_id=19663370]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_aioaw")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="SettingsPanel" type="ColorRect" parent="." unique_id=360483608]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -502.5
+offset_top = -277.0
+offset_right = 502.5
+offset_bottom = 277.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.4862745)
+
+[node name="SettingsRows" type="VBoxContainer" parent="SettingsPanel" unique_id=326345104]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -49.0
+offset_right = 250.0
+offset_bottom = 49.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 25
+
+[node name="MasterRow" type="HBoxContainer" parent="SettingsPanel/SettingsRows" unique_id=1049247343]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MasterLabel" type="Label" parent="SettingsPanel/SettingsRows/MasterRow" unique_id=985735796]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+text = "MASTER VOLUME"
+
+[node name="MasterSlider" type="HSlider" parent="SettingsPanel/SettingsRows/MasterRow" unique_id=110904505]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+value = 100.0
+
+[node name="MasterValue" type="Label" parent="SettingsPanel/SettingsRows/MasterRow" unique_id=335809648]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+text = "100%"
+
+[node name="MusicRow" type="HBoxContainer" parent="SettingsPanel/SettingsRows" unique_id=1128625678]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="MusicLabel" type="Label" parent="SettingsPanel/SettingsRows/MusicRow" unique_id=1666641437]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+text = "MUSIC VOLUME"
+
+[node name="MusicSlider" type="HSlider" parent="SettingsPanel/SettingsRows/MusicRow" unique_id=405038503]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+value = 100.0
+
+[node name="MusicValue" type="Label" parent="SettingsPanel/SettingsRows/MusicRow" unique_id=1266901726]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+text = "100%"
+
+[node name="SfxRow" type="HBoxContainer" parent="SettingsPanel/SettingsRows" unique_id=644293238]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="SfxLabel" type="Label" parent="SettingsPanel/SettingsRows/SfxRow" unique_id=476564803]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+text = "SFX VOLUME"
+
+[node name="SfxSlider" type="HSlider" parent="SettingsPanel/SettingsRows/SfxRow" unique_id=46881934]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+value = 100.0
+
+[node name="SfxValue" type="Label" parent="SettingsPanel/SettingsRows/SfxRow" unique_id=1056262606]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+text = "100%"
+
+[node name="Title" type="Label" parent="." unique_id=558141357]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -121.0
+offset_top = 74.0
+offset_right = 155.0
+offset_bottom = 157.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_de3xg")
+theme_override_font_sizes/font_size = 60
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="." unique_id=658886077]
+layout_mode = 0
+offset_left = 976.0
+offset_top = 67.0
+offset_right = 1055.0
+offset_bottom = 104.0
+theme_override_fonts/font = ExtResource("2_de3xg")
+theme_override_font_sizes/font_size = 21
+text = "← BACK"

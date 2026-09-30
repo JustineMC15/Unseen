@@ -1,0 +1,110 @@
+[gd_scene format=3 uid="uid://tawclxtlb5te"]
+
+[ext_resource type="Script" uid="uid://6lmrfjttlpg1" path="res://user_interface/main_menu/main_menu.gd" id="1_hnapd"]
+[ext_resource type="FontFile" uid="uid://d1sxbkd4eujrm" path="res://user_interface/main_menu/horroroid3d.ttf" id="1_p78xx"]
+[ext_resource type="Script" uid="uid://b5ap6b1xhr1ok" path="res://user_interface/main_menu/horror_button.gd" id="2_hb773"]
+[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://user_interface/settings/stat_ft.ttf" id="2_hnapd"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_p78xx"]
+load_path = "res://.godot/imported/unseen_bg.jpg-42c3a6e3e2ae8c97856c7eb9c87636cf.ctex"
+
+[node name="MainMenu" type="Control" unique_id=1830758009]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hnapd")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1126042551]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("CompressedTexture2D_p78xx")
+expand_mode = 1
+stretch_mode = 6
+flip_v = true
+
+[node name="Title" type="Label" parent="." unique_id=1974758117]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -178.0
+offset_top = 59.0
+offset_right = 184.0
+offset_bottom = 195.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_p78xx")
+theme_override_font_sizes/font_size = 115
+text = " Unseen"
+autowrap_trim_flags = 128
+
+[node name="Menu" type="VBoxContainer" parent="." unique_id=298915685]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -103.0
+offset_top = -102.0
+offset_right = 97.0
+offset_bottom = 158.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="StartButton" type="Button" parent="Menu" unique_id=1017840118]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_pressed_color = Color(0.54509807, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_hnapd")
+theme_override_font_sizes/font_size = 24
+text = "Start
+"
+script = ExtResource("2_hb773")
+
+[node name="LoadsButton" type="Button" parent="Menu" unique_id=1445431440]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_hover_color = Color(0.54509807, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_hnapd")
+theme_override_font_sizes/font_size = 24
+text = "Loads"
+script = ExtResource("2_hb773")
+
+[node name="SettingsButton" type="Button" parent="Menu" unique_id=299152579]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_hover_color = Color(0.54509807, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_hnapd")
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+script = ExtResource("2_hb773")
+
+[node name="QuitButton" type="Button" parent="Menu" unique_id=230866842]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.101960786, 0.101960786, 1)
+theme_override_colors/font_hover_color = Color(0.54509807, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_hnapd")
+theme_override_font_sizes/font_size = 24
+text = "Quit"
+script = ExtResource("2_hb773")
