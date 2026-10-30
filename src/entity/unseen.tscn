@@ -6,8 +6,13 @@
 [ext_resource type="Script" uid="uid://npcqqniv8qm" path="res://src/entity/states/patrol_state.gd" id="3_kpt7s"]
 [ext_resource type="Script" uid="uid://ba2n53otajy21" path="res://src/entity/states/detect_state.gd" id="4_bb53b"]
 [ext_resource type="Script" uid="uid://b2aqr0cdqlp00" path="res://src/entity/states/chase_state.gd" id="5_vl4tv"]
+[ext_resource type="Script" uid="uid://decdehhfy0n0u" path="res://src/entity/entity_catch.gd" id="7_kpt7s"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
+height = 3.0
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bb53b"]
+radius = 1.0
 height = 3.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bekt7"]
@@ -53,6 +58,13 @@ script = ExtResource("4_bb53b")
 
 [node name="Chase" type="Node" parent="StateMachine" unique_id=502200495]
 script = ExtResource("5_vl4tv")
+
+[node name="Catch" type="Area3D" parent="." unique_id=561685482]
+script = ExtResource("7_kpt7s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Catch" unique_id=1423074448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CapsuleShape3D_bb53b")
 
 [node name="PlaceholderSprite" type="MeshInstance3D" parent="." unique_id=1224491861]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

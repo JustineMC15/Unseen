@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dfiw7ibu36501" path="res://src/world/door.tscn" id="3_hnvjn"]
 [ext_resource type="Script" uid="uid://djpsapu1257qf" path="res://src/debug/debug_hud.gd" id="3_vhcx8"]
 [ext_resource type="PackedScene" uid="uid://80yq1qwivak2" path="res://src/world/key_pickup.tscn" id="4_xrcbp"]
+[ext_resource type="PackedScene" uid="uid://w8qst4nvajn0" path="res://src/world/exit_trigger.tscn" id="6_ry5ap"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_4g2s5"]
 vertices = PackedVector3Array(15.5, 0.5, -22, 15.75, 0.5, -21, 24.5, 0.5, -21, 24.5, 0.5, -49.5, -24.5, 0.5, -49.5, -24.5, 0.5, -22, -24.5, 9.25, -49.5, -24.5, 9.25, 49.5, 24.5, 9.25, 49.5, 24.5, 9.25, -49.5, -1.75, 0.5, -4.25, -3, 0.5, -3.75, -3, 0.5, -1, 15.25, 0.5, -19.75, -2.75, 0.5, -19.75, -2.75, 0.5, -6, -1.75, 0.5, -5.75, 24.5, 0.5, -1, -4, 0.5, -4, -15.25, 0.5, -1, -24.5, 0.5, 0, -15.5, 0.5, 0, -24.5, 0.5, -19.75, -4, 0.5, -5.75, 16, 0.5, 20, 16.25, 0.5, 21.75, 24.5, 0.5, 21.5, 24.5, 0.5, 1.25, -15.25, 0.5, 1.25, -24.5, 0.5, 20, 16.25, 0.5, 49.5, 24.5, 0.5, 49.5, -24.5, 0.5, 22.25, -24.5, 0.5, 49.5, 6.5, 0.5, 49.5, 6.5, 0.5, 22.25, 8.25, 0.5, 27.25, 9.5, 0.5, 27.25, 9.75, 0.5, 25, 8.25, 0.5, 22.25, 12.5, 0.5, 25, 12.75, 0.5, 27, 14.5, 0.5, 27, 14.5, 0.5, 22.25, 10.5, 1.75, 26, 10.5, 1.75, 28, 11.5, 1.75, 28, 11.5, 1.75, 26, 12.75, 0.5, 28.75, 14.5, 0.5, 49.5, 9.75, 0.5, 29.25, 8.25, 0.5, 49.5, 12.25, 0.5, 29.25)
@@ -105,9 +106,7 @@ player = NodePath("../../Player")
 [node name="Patrol" parent="Unseen/StateMachine" parent_id_path=PackedInt32Array(1752703208, 772967196) index="0" unique_id=181983688]
 waypoints = Array[Vector3]([Vector3(-3, 0.5, 31), Vector3(12, 0.5, -14), Vector3(-21, 0.5, -14), Vector3(-3, 0.5, 9), Vector3(-3, 0.5, 34)])
 
-[node name="AreaLight3D" type="AreaLight3D" parent="." unique_id=1521845904]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 46)
-area_range = 20.0
-area_size = Vector2(2, 2)
+[node name="Exit" parent="." unique_id=450934086 instance=ExtResource("6_ry5ap")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 1, -35)
 
 [editable path="Unseen"]
