@@ -37,11 +37,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotation.x = clamp(
 			head.rotation.x, deg_to_rad(min_pitch_deg), deg_to_rad(max_pitch_deg)
 		)
-	if event.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = (
-			Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-			else Input.MOUSE_MODE_CAPTURED
-		)
 
 func _update_head_bob(delta: float, sprinting: bool) -> void:
 	var horizontal_speed := Vector2(velocity.x, velocity.z).length()

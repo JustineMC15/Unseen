@@ -3,6 +3,10 @@
 [ext_resource type="Script" uid="uid://84v2jlr6uxlk" path="res://src/player/player.gd" id="1_rxibo"]
 [ext_resource type="Script" uid="uid://dx080dxfk1hiv" path="res://src/player/player_gaze_caster.gd" id="2_mf2ua"]
 [ext_resource type="Script" uid="uid://c5elp4282o12e" path="res://src/player/concealment.gd" id="2_rxibo"]
+[ext_resource type="Script" uid="uid://mq2s220x2oax" path="res://src/player/flashlight.gd" id="3_jiejy"]
+[ext_resource type="Script" uid="uid://0w86fh8pw1w1" path="res://src/player/camera_shake.gd" id="4_o822w"]
+[ext_resource type="Script" uid="uid://c5v3iwu1bfsb4" path="res://src/player/inventory.gd" id="5_o822w"]
+[ext_resource type="Script" uid="uid://dnmwt2wd47422" path="res://src/player/interactor.gd" id="6_x42xx"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 radius = 0.4
@@ -21,5 +25,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=390478342]
 script = ExtResource("2_mf2ua")
 
+[node name="Flashlight" type="SpotLight3D" parent="Head/Camera3D" unique_id=1692305125]
+light_energy = 3.0
+spot_range = 15.0
+spot_angle = 35.0
+script = ExtResource("3_jiejy")
+
+[node name="CameraShake" type="Node" parent="Head/Camera3D" unique_id=978446336]
+script = ExtResource("4_o822w")
+
 [node name="Hide" type="Node" parent="." unique_id=427031145]
 script = ExtResource("2_rxibo")
+
+[node name="Inventory" type="Node" parent="." unique_id=1078215083]
+script = ExtResource("5_o822w")
+
+[node name="Interactor" type="Node" parent="." unique_id=1161810483 node_paths=PackedStringArray("camera", "inventory")]
+script = ExtResource("6_x42xx")
+camera = NodePath("../Head/Camera3D")
+inventory = NodePath("../Inventory")
