@@ -1,0 +1,113 @@
+[gd_scene format=3 uid="uid://cbnk5sg3ade6"]
+
+[ext_resource type="PackedScene" uid="uid://ccfsqp0kteono" path="res://src/player/player.tscn" id="1_4g2s5"]
+[ext_resource type="PackedScene" uid="uid://cbyxqy5odeip3" path="res://src/entity/unseen.tscn" id="2_hnvjn"]
+[ext_resource type="PackedScene" uid="uid://dfiw7ibu36501" path="res://src/world/door.tscn" id="3_hnvjn"]
+[ext_resource type="Script" uid="uid://djpsapu1257qf" path="res://src/debug/debug_hud.gd" id="3_vhcx8"]
+[ext_resource type="PackedScene" uid="uid://80yq1qwivak2" path="res://src/world/key_pickup.tscn" id="4_xrcbp"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_4g2s5"]
+vertices = PackedVector3Array(15.5, 0.5, -22, 15.75, 0.5, -21, 24.5, 0.5, -21, 24.5, 0.5, -49.5, -24.5, 0.5, -49.5, -24.5, 0.5, -22, -24.5, 9.25, -49.5, -24.5, 9.25, 49.5, 24.5, 9.25, 49.5, 24.5, 9.25, -49.5, -1.75, 0.5, -4.25, -3, 0.5, -3.75, -3, 0.5, -1, 15.25, 0.5, -19.75, -2.75, 0.5, -19.75, -2.75, 0.5, -6, -1.75, 0.5, -5.75, 24.5, 0.5, -1, -4, 0.5, -4, -15.25, 0.5, -1, -24.5, 0.5, 0, -15.5, 0.5, 0, -24.5, 0.5, -19.75, -4, 0.5, -5.75, 16, 0.5, 20, 16.25, 0.5, 21.75, 24.5, 0.5, 21.5, 24.5, 0.5, 1.25, -15.25, 0.5, 1.25, -24.5, 0.5, 20, 16.25, 0.5, 49.5, 24.5, 0.5, 49.5, -24.5, 0.5, 22.25, -24.5, 0.5, 49.5, 6.5, 0.5, 49.5, 6.5, 0.5, 22.25, 8.25, 0.5, 27.25, 9.5, 0.5, 27.25, 9.75, 0.5, 25, 8.25, 0.5, 22.25, 12.5, 0.5, 25, 12.75, 0.5, 27, 14.5, 0.5, 27, 14.5, 0.5, 22.25, 10.5, 1.75, 26, 10.5, 1.75, 28, 11.5, 1.75, 28, 11.5, 1.75, 26, 12.75, 0.5, 28.75, 14.5, 0.5, 49.5, 9.75, 0.5, 29.25, 8.25, 0.5, 49.5, 12.25, 0.5, 29.25)
+polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(5, 4, 0), PackedInt32Array(0, 4, 3), PackedInt32Array(9, 8, 6), PackedInt32Array(6, 8, 7), PackedInt32Array(12, 11, 10), PackedInt32Array(2, 13, 1), PackedInt32Array(15, 14, 16), PackedInt32Array(16, 14, 13), PackedInt32Array(2, 17, 13), PackedInt32Array(13, 17, 10), PackedInt32Array(10, 17, 12), PackedInt32Array(10, 16, 13), PackedInt32Array(11, 12, 18), PackedInt32Array(18, 12, 19), PackedInt32Array(19, 21, 20), PackedInt32Array(19, 20, 23), PackedInt32Array(23, 20, 14), PackedInt32Array(14, 20, 22), PackedInt32Array(23, 18, 19), PackedInt32Array(14, 15, 23), PackedInt32Array(25, 24, 26), PackedInt32Array(26, 24, 27), PackedInt32Array(21, 28, 20), PackedInt32Array(20, 28, 29), PackedInt32Array(27, 24, 28), PackedInt32Array(28, 24, 29), PackedInt32Array(30, 25, 31), PackedInt32Array(31, 25, 26), PackedInt32Array(35, 34, 32), PackedInt32Array(32, 34, 33), PackedInt32Array(37, 36, 38), PackedInt32Array(38, 36, 39), PackedInt32Array(41, 40, 42), PackedInt32Array(42, 40, 43), PackedInt32Array(38, 39, 40), PackedInt32Array(40, 39, 43), PackedInt32Array(47, 46, 44), PackedInt32Array(44, 46, 45), PackedInt32Array(41, 42, 48), PackedInt32Array(48, 42, 49), PackedInt32Array(37, 50, 36), PackedInt32Array(36, 50, 51), PackedInt32Array(52, 48, 49), PackedInt32Array(50, 52, 51), PackedInt32Array(51, 52, 49)]
+
+[node name="Testworld" type="Node3D" unique_id=1472277231]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=755679618]
+navigation_mesh = SubResource("NavigationMesh_4g2s5")
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="NavigationRegion3D" unique_id=63113836]
+use_collision = true
+
+[node name="DoorLocked" type="Node3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=2091260823]
+
+[node name="Doorway" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/DoorLocked" unique_id=1234165646]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 4, 27.5)
+use_collision = true
+size = Vector3(0.5, 8, 14)
+
+[node name="Doorway2" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/DoorLocked" unique_id=1219166369]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 4, 42.75)
+use_collision = true
+size = Vector3(0.5, 8, 14.5)
+
+[node name="Doorway3" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/DoorLocked" unique_id=2102535261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 5.1, 35)
+use_collision = true
+size = Vector3(0.5, 5.8, 1)
+
+[node name="Door" parent="NavigationRegion3D/CSGCombiner3D/DoorLocked" unique_id=415683199 instance=ExtResource("3_hnvjn")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.2, 0, 35.5)
+required_item_id = &"key_classroom_201"
+
+[node name="Dooropenable" type="Node3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=996749259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
+
+[node name="Doorway" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/Dooropenable" unique_id=2137881629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 4, 27.5)
+use_collision = true
+size = Vector3(0.5, 8, 14)
+
+[node name="Doorway2" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/Dooropenable" unique_id=893679809]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 4, 42.75)
+use_collision = true
+size = Vector3(0.5, 8, 14.5)
+
+[node name="Doorway3" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D/Dooropenable" unique_id=863085030]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 5.1, 35)
+use_collision = true
+size = Vector3(0.5, 5.8, 1)
+
+[node name="Door" parent="NavigationRegion3D/CSGCombiner3D/Dooropenable" unique_id=1928714114 instance=ExtResource("3_hnvjn")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.2, 0, 35.5)
+
+[node name="Floor" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=1827927730]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(50, 1, 100)
+
+[node name="Ceiling" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=1971681576]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.400001, 0)
+size = Vector3(50, 1, 100)
+
+[node name="Wall" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=21891397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 4, 0)
+size = Vector3(40, 8, 1)
+
+[node name="Wall2" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=1019988039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 4, 21)
+size = Vector3(40, 8, 1)
+
+[node name="Wall3" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=1675636000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 4, -21)
+size = Vector3(40, 8, 1)
+
+[node name="Marker" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=1023604565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -5)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="NavigationRegion3D/CSGCombiner3D" unique_id=821619542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0.5, 27)
+size = Vector3(2, 1.5, 3)
+
+[node name="KeyPickup" parent="." unique_id=1979294546 instance=ExtResource("4_xrcbp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 1.3, 28.2)
+
+[node name="DebugHUD" type="CanvasLayer" parent="." unique_id=695556406]
+script = ExtResource("3_vhcx8")
+
+[node name="Player" parent="." unique_id=1715769690 instance=ExtResource("1_4g2s5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1.5, 35)
+
+[node name="Unseen" parent="." unique_id=1752703208 instance=ExtResource("2_hnvjn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -37)
+
+[node name="Perception" parent="Unseen" index="3" unique_id=1833831182 node_paths=PackedStringArray("player")]
+player = NodePath("../../Player")
+
+[node name="Patrol" parent="Unseen/StateMachine" parent_id_path=PackedInt32Array(1752703208, 772967196) index="0" unique_id=181983688]
+waypoints = Array[Vector3]([Vector3(-3, 0.5, 31), Vector3(12, 0.5, -14), Vector3(-21, 0.5, -14), Vector3(-3, 0.5, 9), Vector3(-3, 0.5, 34)])
+
+[node name="AreaLight3D" type="AreaLight3D" parent="." unique_id=1521845904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 46)
+area_range = 20.0
+area_size = Vector2(2, 2)
+
+[editable path="Unseen"]

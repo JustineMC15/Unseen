@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://v388ia0oab15"]
+
+[ext_resource type="Script" uid="uid://cr6mxwtpa2ixi" path="res://src/item/item_data.gd" id="1_8c11g"]
+
+[resource]
+script = ExtResource("1_8c11g")
+id = &"key_classroom_201"
+display_name = "Classroom 201 Key"
+description = "Key used to open room 201"
+metadata/_custom_type_script = "uid://cr6mxwtpa2ixi"

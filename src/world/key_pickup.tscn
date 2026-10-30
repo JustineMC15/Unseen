@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://80yq1qwivak2"]
+
+[ext_resource type="Script" uid="uid://dgfu0rqss1s32" path="res://src/world/pickup_item.gd" id="1_d2o1a"]
+[ext_resource type="Resource" uid="uid://v388ia0oab15" path="res://src/item/key_classroom_201.tres" id="2_6247d"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vlew8"]
+size = Vector3(0.2, 0.05, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vhcx8"]
+albedo_color = Color(1, 0.84313726, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vlew8"]
+material = SubResource("StandardMaterial3D_vhcx8")
+size = Vector3(0.2, 0.05, 0.1)
+
+[node name="KeyPickup" type="Node3D" unique_id=1979294546]
+script = ExtResource("1_d2o1a")
+item = ExtResource("2_6247d")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=2004101864]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=573147058]
+shape = SubResource("BoxShape3D_vlew8")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1666731187]
+mesh = SubResource("BoxMesh_vlew8")

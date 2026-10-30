@@ -19,8 +19,13 @@ var focused: Interactable
 var _prompt: String = ""
 
 func _ready() -> void:
+	var player := get_parent()
+	if camera == null:
+		camera = player.get_node_or_null("Head/Camera3D") as Camera3D
+	if inventory == null:
+		inventory = player.get_node_or_null("Inventory") as Inventory
 	if camera == null or inventory == null:
-		push_warning("Interactor: assign 'camera' and 'inventory' in the inspector.")
+		push_warning("Interactor: needs a Head/Camera3D and a node named 'Inventory' under Player.")
 	GameState.state_changed.connect(_on_game_state_changed)
 
 func _physics_process(_delta: float) -> void:

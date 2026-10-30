@@ -10,6 +10,19 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 height = 3.0
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bekt7"]
+albedo_color = Color(0.14364877, 0.142121, 0.26281515, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_vlew8"]
+height = 3.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0bfa1"]
+albedo_color = Color(0.45364925, 0, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_kpt7s"]
+radius = 0.05
+height = 0.1
+
 [node name="Unseen" type="CharacterBody3D" unique_id=1752703208 node_paths=PackedStringArray("perception", "state_machine", "nav_agent")]
 script = ExtResource("1_0bfa1")
 perception = NodePath("Perception")
@@ -40,3 +53,13 @@ script = ExtResource("4_bb53b")
 
 [node name="Chase" type="Node" parent="StateMachine" unique_id=502200495]
 script = ExtResource("5_vl4tv")
+
+[node name="PlaceholderSprite" type="MeshInstance3D" parent="." unique_id=1224491861]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+material_override = SubResource("StandardMaterial3D_bekt7")
+mesh = SubResource("CapsuleMesh_vlew8")
+
+[node name="PlaceholderEyes" type="MeshInstance3D" parent="." unique_id=1009180017]
+transform = Transform3D(5, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -0.5)
+material_override = SubResource("StandardMaterial3D_0bfa1")
+mesh = SubResource("CapsuleMesh_kpt7s")

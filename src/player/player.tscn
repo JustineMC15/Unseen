@@ -3,9 +3,9 @@
 [ext_resource type="Script" uid="uid://84v2jlr6uxlk" path="res://src/player/player.gd" id="1_rxibo"]
 [ext_resource type="Script" uid="uid://dx080dxfk1hiv" path="res://src/player/player_gaze_caster.gd" id="2_mf2ua"]
 [ext_resource type="Script" uid="uid://c5elp4282o12e" path="res://src/player/concealment.gd" id="2_rxibo"]
-[ext_resource type="Script" uid="uid://mq2s220x2oax" path="res://src/player/flashlight.gd" id="3_jiejy"]
-[ext_resource type="Script" uid="uid://0w86fh8pw1w1" path="res://src/player/camera_shake.gd" id="4_o822w"]
-[ext_resource type="Script" uid="uid://c5v3iwu1bfsb4" path="res://src/player/inventory.gd" id="5_o822w"]
+[ext_resource type="Script" uid="uid://dmfc2n63nax2c" path="res://src/player/flashlight.gd" id="3_jiejy"]
+[ext_resource type="Script" uid="uid://dw8cxi1oymcrl" path="res://src/player/camera_shake.gd" id="4_o822w"]
+[ext_resource type="Script" uid="uid://boo783mqp25v6" path="res://src/player/inventory.gd" id="5_o822w"]
 [ext_resource type="Script" uid="uid://dnmwt2wd47422" path="res://src/player/interactor.gd" id="6_x42xx"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
@@ -31,8 +31,9 @@ spot_range = 15.0
 spot_angle = 35.0
 script = ExtResource("3_jiejy")
 
-[node name="CameraShake" type="Node" parent="Head/Camera3D" unique_id=978446336]
+[node name="CameraShake" type="Node" parent="Head/Camera3D" unique_id=978446336 node_paths=PackedStringArray("camera")]
 script = ExtResource("4_o822w")
+camera = NodePath("..")
 
 [node name="Hide" type="Node" parent="." unique_id=427031145]
 script = ExtResource("2_rxibo")
@@ -40,7 +41,7 @@ script = ExtResource("2_rxibo")
 [node name="Inventory" type="Node" parent="." unique_id=1078215083]
 script = ExtResource("5_o822w")
 
-[node name="Interactor" type="Node" parent="." unique_id=1161810483 node_paths=PackedStringArray("camera", "inventory")]
+[node name="Interactor" type="Node" parent="." unique_id=552058076 node_paths=PackedStringArray("camera", "inventory")]
 script = ExtResource("6_x42xx")
 camera = NodePath("../Head/Camera3D")
 inventory = NodePath("../Inventory")
