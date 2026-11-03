@@ -24,6 +24,12 @@ extends CharacterBody3D
 var _bob_time: float = 0.0
 var _camera_rest_position: Vector3
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+# True while hiding in a Locker: no walking, and the view is limited.
+var controls_locked: bool = false
+var _look_limited: bool = false
+var _yaw_center: float = 0.0
+var _yaw_half_range: float = 0.0
+var _pitch_half_range: float = 0.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -34,9 +40,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		head.rotate_x(-event.relative.y * mouse_sensitivity)
-		head.rotation.x = clamp(
-			head.rotation.x, deg_to_rad(min_pitch_deg), deg_to_rad(max_pitch_deg)
-		)
+		var pitch_min := deg_to_rad(min_pitch_deg)
+		var pitch_max := deg_to_rad(max_pitch_deg)
+		if _look_limited:
+			rotation.y = _yaw_center + clampf(
+				angle_difference(_yaw_center, rotation.y), -_yaw_half_range, _yaw_half_range
+			)
+			pitch_min = -_pitch_half_range
+			pitch_max = _pitch_half_range
+		head.rotation.x = clamp(head.rotation.x, pitch_min, pitch_max)
 
 func _update_head_bob(delta: float, sprinting: bool) -> void:
 	var horizontal_speed := Vector2(velocity.x, velocity.z).length()
@@ -56,6 +68,9 @@ func _update_head_bob(delta: float, sprinting: bool) -> void:
 		)
 
 func _physics_process(delta: float) -> void:
+	if controls_locked:
+		velocity = Vector3.ZERO
+		return
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
 	var sprinting := Input.is_action_pressed("sprint")
@@ -116,3 +131,18 @@ func _try_step_up(direction: Vector3) -> void:
 # entity's vision check respect the hiding mechanic.
 func is_hidden() -> bool:
 	return hide_component.is_hidden
+
+func lock_controls(yaw_center: float, yaw_half_range_deg: float, pitch_half_range_deg: float) -> void:
+	controls_locked = true
+	velocity = Vector3.ZERO
+	_look_limited = true
+	_yaw_center = yaw_center
+	_yaw_half_range = deg_to_rad(yaw_half_range_deg)
+	_pitch_half_range = deg_to_rad(pitch_half_range_deg)
+	rotation.y = yaw_center
+	head.rotation.x = 0.0
+	camera.position = _camera_rest_position
+
+func unlock_controls() -> void:
+	controls_locked = false
+	_look_limited = false

@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://cqausedosnjxv"]
+
+[ext_resource type="Script" uid="uid://viu7a4602rl4" path="res://src/world/locker.gd" id="1_r0cb5"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r0cb5"]
+size = Vector3(1.25, 2.2, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vf1a2"]
+albedo_color = Color(0.52676916, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vlew8"]
+size = Vector3(1.2, 2.2, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ghiiv"]
+size = Vector3(0.05, 2.2, 1.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vlew8"]
+size = Vector3(0.05, 2.2, 1.2)
+
+[node name="Locker" type="Node3D" unique_id=399607166 node_paths=PackedStringArray("hide_point", "exit_point")]
+script = ExtResource("1_r0cb5")
+hide_point = NodePath("HidePoint")
+exit_point = NodePath("ExitPoint")
+
+[node name="Backwall" type="StaticBody3D" parent="." unique_id=257490651]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Backwall" unique_id=516270812]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -0.6)
+shape = SubResource("BoxShape3D_r0cb5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Backwall" unique_id=2031367012]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+material_override = SubResource("StandardMaterial3D_vf1a2")
+mesh = SubResource("BoxMesh_vlew8")
+
+[node name="Leftwall" type="StaticBody3D" parent="." unique_id=1094250714]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Leftwall" unique_id=1073207080]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.1, 0)
+shape = SubResource("BoxShape3D_ghiiv")
+
+[node name="Rightwall" type="StaticBody3D" parent="." unique_id=1250363301]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Rightwall" unique_id=1387771541]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 1.1, 0)
+shape = SubResource("BoxShape3D_vlew8")
+
+[node name="HidePoint" type="Marker3D" parent="." unique_id=584769440]
+
+[node name="ExitPoint" type="Marker3D" parent="." unique_id=954701120]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.2)
