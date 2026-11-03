@@ -3,19 +3,28 @@ extends AIState
 
 @export var base_speed: float = 5.0
 @export var watched_speed_multiplier: float = 1.6
-@export var give_up_time: float = 4.0
+@export var give_up_time: float = 2.0
 @export var turn_speed: float = 6.0
 
 var _is_watched: bool = false
+var _can_see_player: bool = true
 var _give_up_timer: float = 0.0
 
 func enter() -> void:
 	_is_watched = false
+	_can_see_player = true
 	_give_up_timer = 0.0
+	# Covers entering Chase without having seen the player (e.g. a scripted scare).
+	entity.last_known_player_position = entity.perception.player.global_position
 
 func physics_update(delta: float) -> void:
 	var speed := base_speed * (watched_speed_multiplier if _is_watched else 1.0)
-	var target := entity.perception.player.global_position
+	# Only homes in on the player while it can see them; otherwise it goes
+	# to the last spot it saw them, so breaking line of sight or hiding works.
+	var target := (
+		entity.perception.player.global_position if _can_see_player
+		else entity.last_known_player_position
+	)
 	entity.move_towards(target, speed)
 	entity.face_towards(target, turn_speed, delta)
 
@@ -23,9 +32,10 @@ func on_gaze_changed(is_watched: bool, _watched_duration: float, _delta: float) 
 	_is_watched = is_watched
 
 func on_perception_updated(can_see_player: bool, delta: float) -> void:
+	_can_see_player = can_see_player
 	if can_see_player:
 		_give_up_timer = 0.0
 	else:
 		_give_up_timer += delta
 		if _give_up_timer >= give_up_time:
-			transition_requested.emit("Patrol")
+			transition_requested.emit("Search")

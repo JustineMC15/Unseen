@@ -1,29 +1,35 @@
 class_name PatrolState
 extends AIState
 
-@export var waypoints: Array[Vector3] = []
+@export var route: PatrolRoute
 @export var move_speed: float = 2.0
 @export var turn_speed: float = 4.0
 
+var _waypoints: Array[Vector3] = []
 var _waypoint_index: int = 0
 var _flinching: bool = false
 
 func enter() -> void:
 	_flinching = false
-	if waypoints.is_empty():
-		push_warning("PatrolState: no waypoints assigned")
+	if route != null:
+		_waypoints = route.get_points()
+	else:
+		_waypoints = []
+	if _waypoints.is_empty():
+		push_warning("PatrolState: no route or no markers under the route")
+	_waypoint_index = clampi(_waypoint_index, 0, maxi(_waypoints.size() - 1, 0))
 
 func physics_update(delta: float) -> void:
 	if _flinching:
 		# Hold position, just turn to face whoever is staring.
 		entity.face_towards(entity.perception.player.global_position, turn_speed, delta)
 		return
-	if waypoints.is_empty():
+	if _waypoints.is_empty():
 		return
-	entity.move_towards(waypoints[_waypoint_index], move_speed)
-	entity.face_towards(waypoints[_waypoint_index], turn_speed, delta)
+	entity.move_towards(_waypoints[_waypoint_index], move_speed)
+	entity.face_towards(_waypoints[_waypoint_index], turn_speed, delta)
 	if entity.nav_agent.is_navigation_finished():
-		_waypoint_index = (_waypoint_index + 1) % waypoints.size()
+		_waypoint_index = (_waypoint_index + 1) % _waypoints.size()
 
 func on_gaze_changed(is_watched: bool, _watched_duration: float, _delta: float) -> void:
 	_flinching = is_watched
