@@ -6,6 +6,8 @@ extends Node
 signal item_added(item: ItemData, slot: int)
 signal item_removed(item: ItemData, slot: int)
 signal selection_changed(slot: int)
+signal ui_toggled(is_open: bool)
+
 
 const MAX_SLOTS: int = 10
 
@@ -13,6 +15,7 @@ const MAX_SLOTS: int = 10
 var selected_slot: int = -1
 
 var _slots: Array[ItemData] = []
+var is_ui_open: bool = false
 
 func _init() -> void:
 	_slots.resize(MAX_SLOTS)
@@ -78,6 +81,9 @@ func cycle_selection(step: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not GameState.is_playing():
 		return
+	if event.is_action_pressed("inventory"):
+		set_ui_open(not is_ui_open)
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var keycode: int = event.physical_keycode
 		if keycode >= KEY_1 and keycode <= KEY_9:
@@ -89,3 +95,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			cycle_selection(-1)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			cycle_selection(1)
+
+func set_ui_open(value: bool) -> void:
+	if value == is_ui_open:
+		return
+	is_ui_open = value
+	ui_toggled.emit(value)
