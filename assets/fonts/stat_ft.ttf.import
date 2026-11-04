@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://d1sxbkd4eujrm"
-path="res://.godot/imported/horroroid3d.ttf-9b7b07c9b488089d1985fdb4603da0e4.fontdata"
+uid="uid://djgj6f3thuvxf"
+path="res://.godot/imported/stat_ft.ttf-355933be079ed831f10982cf35adf2bd.fontdata"
 
 [deps]
 
-source_file="res://user_interface/main_menu/horroroid3d.ttf"
-dest_files=["res://.godot/imported/horroroid3d.ttf-9b7b07c9b488089d1985fdb4603da0e4.fontdata"]
+source_file="res://assets/fonts/stat_ft.ttf"
+dest_files=["res://.godot/imported/stat_ft.ttf-355933be079ed831f10982cf35adf2bd.fontdata"]
 
 [params]
 
