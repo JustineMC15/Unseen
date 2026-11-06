@@ -1,6 +1,7 @@
+
 extends Control
 
-@export_file("*.tscn") var back_scene: String = "res://user_interface/main_menu/main_menu.tscn"
+@export_file("*.tscn") var back_scene: String = "res://src/ui/main_menu/main_menu.tscn"
 
 @onready var master_slider: HSlider = $SettingsPanel/SettingsRows/MasterRow/MasterSlider
 @onready var music_slider: HSlider = $SettingsPanel/SettingsRows/MusicRow/MusicSlider
@@ -42,4 +43,8 @@ func _update_volume_labels() -> void:
 
 
 func _on_back_pressed() -> void:
+	if not ResourceLoader.exists(back_scene):
+		push_error("Settings: Main Menu scene not found: " + back_scene)
+		return
+
 	get_tree().change_scene_to_file(back_scene)

@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://tawclxtlb5te"]
 
-[ext_resource type="Script" uid="uid://6lmrfjttlpg1" path="res://user_interface/main_menu/main_menu.gd" id="1_hnapd"]
-[ext_resource type="FontFile" uid="uid://d1sxbkd4eujrm" path="res://user_interface/main_menu/horroroid3d.ttf" id="1_p78xx"]
-[ext_resource type="Script" uid="uid://b5ap6b1xhr1ok" path="res://user_interface/main_menu/horror_button.gd" id="2_hb773"]
-[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://user_interface/settings/stat_ft.ttf" id="2_hnapd"]
+[ext_resource type="Script" uid="uid://6lmrfjttlpg1" path="res://src/ui/main_menu/main_menu.gd" id="1_hnapd"]
+[ext_resource type="FontFile" uid="uid://d1sxbkd4eujrm" path="res://assets/fonts/horroroid3d.ttf" id="1_p78xx"]
+[ext_resource type="Script" uid="uid://b5ap6b1xhr1ok" path="res://src/ui/main_menu/horror_button.gd" id="2_hb773"]
+[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://assets/fonts/stat_ft.ttf" id="2_hnapd"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_p78xx"]
 load_path = "res://.godot/imported/unseen_bg.jpg-42c3a6e3e2ae8c97856c7eb9c87636cf.ctex"

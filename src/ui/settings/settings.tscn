@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://d3ivk5l83gdsj"]
 
-[ext_resource type="Texture2D" uid="uid://bx4kaxssb0bv8" path="res://user_interface/main_menu/unseen_bg.jpg" id="1_aioaw"]
-[ext_resource type="Script" uid="uid://bnkq8hkht1bfw" path="res://user_interface/settings/settings.gd" id="1_m6wgb"]
-[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://user_interface/settings/stat_ft.ttf" id="2_de3xg"]
+[ext_resource type="Texture2D" uid="uid://bx4kaxssb0bv8" path="res://assets/background/unseen_bg.jpg" id="1_aioaw"]
+[ext_resource type="Script" uid="uid://bnkq8hkht1bfw" path="res://src/ui/settings/settings.gd" id="1_m6wgb"]
+[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://assets/fonts/stat_ft.ttf" id="2_de3xg"]
 
 [node name="Settings" type="Control" unique_id=590182021]
 layout_mode = 3
