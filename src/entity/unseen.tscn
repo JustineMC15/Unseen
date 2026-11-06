@@ -63,6 +63,8 @@ script = ExtResource("5_vl4tv")
 [node name="Search" type="Node" parent="StateMachine" unique_id=1536249633]
 script = ExtResource("7_bb53b")
 
+[node name="Investigate" type="Node" parent="StateMachine" unique_id=1420951932]
+
 [node name="Catch" type="Area3D" parent="." unique_id=561685482]
 script = ExtResource("7_kpt7s")
 

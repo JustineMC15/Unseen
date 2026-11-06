@@ -40,8 +40,5 @@ target_desired_distance = 0.5
 [node name="Perception" parent="Unseen" index="3" unique_id=1833831182 node_paths=PackedStringArray("player")]
 player = NodePath("../../Player")
 
-[node name="Patrol" parent="Unseen/StateMachine" parent_id_path=PackedInt32Array(1752703208, 772967196) index="0" unique_id=181983688]
-waypoints = Array[Vector3]([Vector3(-16.715, 12, -25), Vector3(-16.715, 12, 20), Vector3(-16.715, 12, 40)])
-
 [editable path="Player"]
 [editable path="Unseen"]

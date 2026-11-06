@@ -3,10 +3,10 @@ extends Node
 
 signal state_changed(previous_state: String, new_state: String)
 
-## Node name of the state to start in, e.g. "Patrol".
+# Node name of the state to start in
 @export var initial_state_name: String = "Patrol"
 
-var _states: Dictionary = {}          # String -> AIState
+var _states: Dictionary = {} # String -> AIState
 var current_state: AIState
 var current_state_name: String = ""
 
@@ -47,3 +47,7 @@ func _change_state(state_name: String) -> void:
 	current_state_name = state_name
 	current_state.enter()
 	state_changed.emit(previous_name, state_name)
+
+func notify_noise(room_id: StringName, floor_id: int, world_position: Vector3) -> void:
+	if current_state:
+		current_state.on_noise_alert(room_id, floor_id, world_position)

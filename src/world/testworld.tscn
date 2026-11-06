@@ -134,18 +134,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -11)
 [node name="Marker3D4" type="Marker3D" parent="PatrolRoute" unique_id=983481201]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 13)
 
+[node name="Marker3D5" type="Marker3D" parent="PatrolRoute" unique_id=41306962]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, 27)
+
+[node name="Marker3D6" type="Marker3D" parent="PatrolRoute" unique_id=186745355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, 10)
+
 [node name="Locker" parent="." unique_id=399607166 instance=ExtResource("8_3pysp")]
 transform = Transform3D(-0.99999994, 0, 0, 0, 1, 0, 0, 0, -0.99999994, 13, 0, 19.9)
-look_half_angle_deg = null
-look_half_pitch_deg = null
-prompt_text = null
-enabled = null
 
 [node name="Locker2" parent="." unique_id=639482746 instance=ExtResource("8_3pysp")]
 transform = Transform3D(-0.99999994, 0, 0, 0, 1, 0, 0, 0, -0.99999994, 11, 0, 19.9)
-look_half_angle_deg = null
-look_half_pitch_deg = null
-prompt_text = null
-enabled = null
 
 [editable path="Unseen"]

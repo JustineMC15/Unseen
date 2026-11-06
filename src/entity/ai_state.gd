@@ -19,3 +19,6 @@ func on_gaze_changed(_is_watched: bool, _watched_duration: float, _delta: float)
 
 func on_perception_updated(_can_see_player: bool, _delta: float) -> void:
 	pass
+
+func on_noise_alert(_room_id: StringName, _floor_id: int, _world_position: Vector3) -> void:
+	pass

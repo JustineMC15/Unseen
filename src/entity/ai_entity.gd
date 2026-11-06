@@ -5,13 +5,31 @@ extends CharacterBody3D
 @export var state_machine: AIStateMachine
 @export var nav_agent: NavigationAgent3D
 
-## Updated every frame the entity can see the player. Used by Chase and Search.
+var location: LocationTracker
+var hearing: EntityHearing
+
+# Where the entity believes the player is, from sight or noise.
+# Updated every frame the entity can see the player. Used by Chase and Search.
 var last_known_player_position: Vector3
+
+var noise_room_id: StringName = &""
+var noise_floor_id: int = 0
+var noise_position: Vector3
+
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
 	add_to_group("gaze_watchable")
 	floor_snap_length = 0.5
+	for child in get_children():
+		if child is LocationTracker:
+			location = child as LocationTracker
+		elif child is EntityHearing:
+			hearing = child as EntityHearing
+	if location == null:
+		push_warning("AIEntity: add a LocationTracker child.")
+	if hearing:
+		hearing.noise_alert.connect(_on_noise_alert)
 
 func _physics_process(delta: float) -> void:
 	var sees_player := perception.can_see_player()
@@ -23,6 +41,20 @@ func _physics_process(delta: float) -> void:
 		GazeSystem.get_watched_duration(self),
 		delta
 	)
+
+# Called by the states that respond to noise
+func respond_to_noise() -> void:
+	if noise_floor_id != location.floor_id:
+		state_machine.force_transition("Investigate")
+	else:
+		last_known_player_position = noise_position
+		state_machine.force_transition("Search")
+
+func _on_noise_alert(room_id: StringName, floor_id: int, world_position: Vector3) -> void:
+	noise_room_id = room_id
+	noise_floor_id = floor_id
+	noise_position = world_position
+	state_machine.notify_noise(room_id, floor_id, world_position)
 
 func move_towards(target_position: Vector3, speed: float) -> void:
 	nav_agent.target_position = target_position

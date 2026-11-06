@@ -8,11 +8,13 @@ signal opened
 signal closed
 
 @export var required_item_id: StringName = &""
-## Remove the key from the inventory when it unlocks the door.
 @export var consume_item: bool = true
 @export var open_angle_deg: float = 90.0
 @export var open_time: float = 0.6
 @export var locked_message: String = "It's locked."
+@export var open_loudness: float = 0.5
+# Noise when fail to open
+@export var locked_loudness: float = 0.4
 
 var is_locked: bool = false
 var is_open: bool = false
@@ -38,8 +40,20 @@ func get_prompt(interactor: Interactor) -> String:
 
 func _on_interact(interactor: Interactor) -> void:
 	if is_locked and not _try_unlock(interactor):
+		_emit_noise(interactor, &"door_locked", locked_loudness)
 		return
 	_set_open(not is_open)
+	_emit_noise(interactor, &"door_open" if is_open else &"door_close", open_loudness)
+
+func _emit_noise(interactor: Interactor, noise_type: StringName, loudness: float) -> void:
+	var tracker := LocationTracker.find_on(interactor.get_parent())
+	NoiseManager.emit_noise(
+		noise_type,
+		loudness,
+		tracker.room_id if tracker else &"",
+		tracker.floor_id if tracker else 0,
+		global_position
+	)
 
 func _try_unlock(interactor: Interactor) -> bool:
 	var inventory := interactor.inventory

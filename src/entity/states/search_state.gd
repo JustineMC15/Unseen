@@ -1,16 +1,13 @@
-## After Chase loses the player: walk to where the player was last seen,
-## look around for a few seconds, then go back to Patrol.
-## Seeing the player again goes to Detect (same as Patrol), not straight to Chase.
 class_name SearchState
 extends AIState
- 
+# Walk to where player is last seen when chase is lost
+# Goes to patrol or detect after
 @export var move_speed: float = 3.5
 @export var turn_speed: float = 5.0
-## Seconds spent looking around once the entity reaches the spot.
 @export var look_around_time: float = 4.0
-## Radians per second while looking around (1.5 for 4s is almost a full turn).
+# Radians per second while looking around (1.5 for 4s is almost a full turn).
 @export var look_turn_speed: float = 1.5
-## Fail-safe so the entity never gets stuck if the spot can't be reached.
+# Search time failsafe
 @export var max_search_time: float = 15.0
  
 var _search_position: Vector3
@@ -25,7 +22,6 @@ func enter() -> void:
 	_search_position = entity.last_known_player_position
  
 func physics_update(delta: float) -> void:
-	# Pointed at a new spot while already searching: go there instead.
 	if _search_position.distance_to(entity.last_known_player_position) > 0.5:
 		_search_position = entity.last_known_player_position
 		_arrived = false
@@ -53,3 +49,5 @@ func on_perception_updated(can_see_player: bool, _delta: float) -> void:
 	if can_see_player:
 		transition_requested.emit("Detect")
  
+func on_noise_alert(_room_id: StringName, _floor_id: int, _world_position: Vector3) -> void:
+	entity.respond_to_noise()
