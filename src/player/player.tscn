@@ -7,7 +7,8 @@
 [ext_resource type="Script" uid="uid://dw8cxi1oymcrl" path="res://src/player/camera_shake.gd" id="4_o822w"]
 [ext_resource type="Script" uid="uid://c5v3iwu1bfsb4" path="res://src/player/inventory.gd" id="5_o822w"]
 [ext_resource type="Script" uid="uid://dnmwt2wd47422" path="res://src/player/interactor.gd" id="6_x42xx"]
-[ext_resource type="Script" uid="uid://c3swwucnxnc2j" path="res://src/player/player_location.gd" id="8_x42xx"]
+[ext_resource type="Script" uid="uid://c3yk3cswja0fo" path="res://src/entity/location_tracker.gd" id="8_l271a"]
+[ext_resource type="Script" uid="uid://bcei4bofmtcfx" path="res://src/player/footstep_noise.gd" id="9_8ydov"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 radius = 0.4
@@ -47,5 +48,8 @@ script = ExtResource("6_x42xx")
 camera = NodePath("../Head/Camera3D")
 inventory = NodePath("../Inventory")
 
-[node name="PlayerLocation" type="Node" parent="." unique_id=1077912053]
-script = ExtResource("8_x42xx")
+[node name="Location" type="Node" parent="." unique_id=1077912053]
+script = ExtResource("8_l271a")
+
+[node name="Footsteps" type="Node" parent="." unique_id=349913420]
+script = ExtResource("9_8ydov")

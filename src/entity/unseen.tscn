@@ -8,6 +8,9 @@
 [ext_resource type="Script" uid="uid://b2aqr0cdqlp00" path="res://src/entity/states/chase_state.gd" id="5_vl4tv"]
 [ext_resource type="Script" uid="uid://hhu1cjovyqsl" path="res://src/entity/states/search_state.gd" id="7_bb53b"]
 [ext_resource type="Script" uid="uid://decdehhfy0n0u" path="res://src/entity/entity_catch.gd" id="7_kpt7s"]
+[ext_resource type="Script" uid="uid://df440bt2vm7ih" path="res://src/entity/states/investigate_state.gd" id="8_yjbss"]
+[ext_resource type="Script" uid="uid://c3yk3cswja0fo" path="res://src/entity/location_tracker.gd" id="10_2io5g"]
+[ext_resource type="Script" uid="uid://m61vmol525ky" path="res://src/entity/entity_hearing.gd" id="11_306bh"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 height = 3.0
@@ -64,6 +67,7 @@ script = ExtResource("5_vl4tv")
 script = ExtResource("7_bb53b")
 
 [node name="Investigate" type="Node" parent="StateMachine" unique_id=1420951932]
+script = ExtResource("8_yjbss")
 
 [node name="Catch" type="Area3D" parent="." unique_id=561685482]
 script = ExtResource("7_kpt7s")
@@ -81,3 +85,9 @@ mesh = SubResource("CapsuleMesh_vlew8")
 transform = Transform3D(5, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -0.5)
 material_override = SubResource("StandardMaterial3D_0bfa1")
 mesh = SubResource("CapsuleMesh_kpt7s")
+
+[node name="Location" type="Node" parent="." unique_id=25828339]
+script = ExtResource("10_2io5g")
+
+[node name="Hearing" type="Node" parent="." unique_id=1156884217]
+script = ExtResource("11_306bh")
