@@ -5,6 +5,11 @@ extends CharacterBody3D
 @export var state_machine: AIStateMachine
 @export var nav_agent: NavigationAgent3D
 
+## How close (flat, height ignored) the entity must get to a point on the red line
+## before it turns toward the next one. Smaller = takes corners tighter.
+@export var path_reach: float = 0.2
+@export var repath_interval: float = 0.4
+
 var location: LocationTracker
 var hearing: EntityHearing
 
@@ -17,6 +22,10 @@ var noise_floor_id: int = 0
 var noise_position: Vector3
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var _path: PackedVector3Array = PackedVector3Array()
+var _path_index: int = 0
+var _path_target: Vector3 = Vector3.INF
+var _repath_left: float = 0.0
 
 func _ready() -> void:
 	add_to_group("gaze_watchable")
@@ -57,19 +66,42 @@ func _on_noise_alert(room_id: StringName, floor_id: int, world_position: Vector3
 	state_machine.notify_noise(room_id, floor_id, world_position)
 
 func move_towards(target_position: Vector3, speed: float) -> void:
+	var delta := get_physics_process_delta_time()
+
+	# Kept as before: the states still ask nav_agent.is_navigation_finished().
 	nav_agent.target_position = target_position
+
+	# Recalculate the path when the target moved, or every repath_interval seconds.
+	_repath_left -= delta
+	if _path.is_empty() or _repath_left <= 0.0 or _path_target.distance_to(target_position) > 0.5:
+		_path = NavigationServer3D.map_get_path(
+			nav_agent.get_navigation_map(), global_position, target_position, true
+		)
+		_path_index = 0
+		_path_target = target_position
+		_repath_left = repath_interval
+
 	var horizontal := Vector3.ZERO
-	if not nav_agent.is_navigation_finished():
-		var direction := nav_agent.get_next_path_position() - global_position
-		direction.y = 0.0
-		horizontal = direction.normalized() * speed
+	if not _path.is_empty():
+		# Never smaller than one frame of travel, so a fast entity can't jump past a point.
+		var reach := maxf(path_reach, speed * delta * 1.5)
+		while _path_index < _path.size() - 1 and _flat_distance_to(_path[_path_index]) < reach:
+			_path_index += 1
+		var to_point := _path[_path_index] - global_position
+		to_point.y = 0.0
+		if to_point.length() > 0.05:
+			horizontal = to_point.normalized() * speed
+
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():
 		velocity.y = 0.0
 	else:
-		velocity.y -= _gravity * get_physics_process_delta_time()
+		velocity.y -= _gravity * delta
 	move_and_slide()
+
+func _flat_distance_to(point: Vector3) -> float:
+	return Vector2(point.x - global_position.x, point.z - global_position.z).length()
 
 func face_towards(target_position: Vector3, turn_speed: float, delta: float) -> void:
 	var flat_target := target_position

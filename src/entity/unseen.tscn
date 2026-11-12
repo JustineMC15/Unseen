@@ -44,6 +44,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 shape = SubResource("CapsuleShape3D_vlew8")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=484813096]
+debug_enabled = true
 
 [node name="Eyes" type="Node3D" parent="." unique_id=1575763648]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)

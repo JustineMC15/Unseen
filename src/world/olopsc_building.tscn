@@ -18,7 +18,7 @@ navigation_mesh = ExtResource("1_66la8")
 script = ExtResource("3_y58e2")
 
 [node name="Unseen" parent="." unique_id=1752703208 instance=ExtResource("3_txx5u")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.3, -4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.4, -20)
 
 [node name="Perception" parent="Unseen" index="3" unique_id=1833831182 node_paths=PackedStringArray("player")]
 player = NodePath("../../Player")
