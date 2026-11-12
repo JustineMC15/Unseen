@@ -52,7 +52,7 @@ func physics_update(delta: float) -> void:
 			return
 
 	entity.move_towards(_target_point, move_speed)
-	entity.face_towards(_target_point, turn_speed, delta)
+	entity.face_movement(turn_speed, delta)
 	if entity.nav_agent.is_navigation_finished():
 		_has_target = false
 		_look_left = _target_look_time
@@ -136,6 +136,6 @@ func _follow_route() -> void:
 	if _waypoints.is_empty():
 		return
 	entity.move_towards(_waypoints[_waypoint_index], move_speed)
-	entity.face_towards(_waypoints[_waypoint_index], turn_speed, get_physics_process_delta_time())
+	entity.face_movement(turn_speed, get_physics_process_delta_time())
 	if entity.nav_agent.is_navigation_finished():
 		_waypoint_index = (_waypoint_index + 1) % _waypoints.size()

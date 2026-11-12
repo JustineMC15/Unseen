@@ -26,7 +26,10 @@ func physics_update(delta: float) -> void:
 		else entity.last_known_player_position
 	)
 	entity.move_towards(target, speed)
-	entity.face_towards(target, turn_speed, delta)
+	if _can_see_player:
+		entity.face_towards(target, turn_speed, delta)
+	else:
+		entity.face_movement(turn_speed, delta)
 
 func on_gaze_changed(is_watched: bool, _watched_duration: float, _delta: float) -> void:
 	_is_watched = is_watched

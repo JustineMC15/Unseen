@@ -26,6 +26,7 @@ var _path: PackedVector3Array = PackedVector3Array()
 var _path_index: int = 0
 var _path_target: Vector3 = Vector3.INF
 var _repath_left: float = 0.0
+var _move_direction: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	add_to_group("gaze_watchable")
@@ -91,7 +92,7 @@ func move_towards(target_position: Vector3, speed: float) -> void:
 		to_point.y = 0.0
 		if to_point.length() > 0.05:
 			horizontal = to_point.normalized() * speed
-
+	_move_direction = horizontal.normalized()
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	if is_on_floor():
@@ -112,3 +113,9 @@ func face_towards(target_position: Vector3, turn_speed: float, delta: float) -> 
 	var wanted := global_transform.looking_at(flat_target, Vector3.UP).basis.get_rotation_quaternion()
 	var turned := current.slerp(wanted, clamp(turn_speed * delta, 0.0, 1.0))
 	global_transform.basis = Basis(turned)
+
+## Turns toward the direction the body is actually walking (the next stretch of the path).
+func face_movement(turn_speed: float, delta: float) -> void:
+	if _move_direction == Vector3.ZERO:
+		return
+	face_towards(global_position + _move_direction, turn_speed, delta)

@@ -35,7 +35,7 @@ func physics_update(delta: float) -> void:
  
 	if not _arrived:
 		entity.move_towards(_search_position, move_speed)
-		entity.face_towards(_search_position, turn_speed, delta)
+		entity.face_movement(turn_speed, delta)
 		if entity.nav_agent.is_navigation_finished():
 			_arrived = true
 		return

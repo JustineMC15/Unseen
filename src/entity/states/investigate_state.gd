@@ -13,7 +13,7 @@ func enter() -> void:
 func physics_update(delta: float) -> void:
 	_timer += delta
 	entity.move_towards(entity.noise_position, move_speed)
-	entity.face_towards(entity.noise_position, turn_speed, delta)
+	entity.face_movement(turn_speed, delta)
 	var on_target_floor := entity.location.floor_id == entity.noise_floor_id
 	if on_target_floor or entity.nav_agent.is_navigation_finished() or _timer >= max_travel_time:
 		transition_requested.emit("Patrol")
