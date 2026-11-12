@@ -13,11 +13,12 @@
 [ext_resource type="Script" uid="uid://m61vmol525ky" path="res://src/entity/entity_hearing.gd" id="11_306bh"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
+radius = 0.3
 height = 3.0
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bb53b"]
 radius = 1.0
-height = 4.0
+height = 3.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bekt7"]
 albedo_color = Color(0.14364877, 0.142121, 0.26281515, 1)
