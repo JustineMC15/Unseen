@@ -65,3 +65,6 @@ func _set_state(new_state: State) -> void:
 		else Input.MOUSE_MODE_VISIBLE
 	)
 	state_changed.emit(previous, new_state)
+
+func enter_menu() -> void:
+	_set_state(State.MENU)

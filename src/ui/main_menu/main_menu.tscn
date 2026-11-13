@@ -8,7 +8,7 @@
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_p78xx"]
 load_path = "res://.godot/imported/unseen_bg.jpg-42c3a6e3e2ae8c97856c7eb9c87636cf.ctex"
 
-[node name="MainMenu" type="Control" unique_id=1830758009]
+[node name="MainMenu" type="Control" unique_id=1830758009 node_paths=PackedStringArray("start_button", "load_button", "settings_button", "quit_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,6 +16,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hnapd")
+start_button = NodePath("Menu/StartButton")
+load_button = NodePath("Menu/LoadsButton")
+settings_button = NodePath("Menu/SettingsButton")
+quit_button = NodePath("Menu/QuitButton")
+start_scene = "uid://caobhw3rhw7ga"
+settings_scene = "uid://d3ivk5l83gdsj"
 
 [node name="Background" type="TextureRect" parent="." unique_id=1126042551]
 layout_mode = 1

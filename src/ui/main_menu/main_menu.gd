@@ -1,68 +1,53 @@
 extends Control
 
-# ==================================================
-# SCENES
-# ==================================================
+@export var start_button: Button
+@export var load_button: Button
+@export var settings_button: Button
+@export var quit_button: Button
 
-@export_file("*.tscn") var play_scene: String = ""
+@export_file("*.tscn") var start_scene: String = ""
 @export_file("*.tscn") var load_scene: String = ""
-@export_file("*.tscn") var settings_scene: String = "res://user_interface/settings/settings.tscn"
-
-# ==================================================
-# BUTTONS
-# ==================================================
-
-@onready var play_button: Button = find_child("PlayButton", true, false)
-@onready var load_button: Button = find_child("LoadButton", true, false)
-@onready var settings_button: Button = find_child("SettingsButton", true, false)
-@onready var quit_button: Button = find_child("QuitButton", true, false)
-
+@export_file("*.tscn") var settings_scene: String = ""
 
 func _ready() -> void:
-	# Connect buttons
-	if play_button:
-		play_button.pressed.connect(_on_play_pressed)
+	GameState.enter_menu()
 
-	if load_button:
-		load_button.pressed.connect(_on_load_pressed)
+	_bind(start_button, _on_start_pressed)
+	_bind(load_button, _on_load_pressed)
+	_bind(settings_button, _on_settings_pressed)
+	_bind(quit_button, _on_quit_pressed)
 
-	if settings_button:
-		settings_button.pressed.connect(_on_settings_pressed)
+	_disable_if_missing(start_button, start_scene)
+	_disable_if_missing(load_button, load_scene)
+	_disable_if_missing(settings_button, settings_scene)
 
-	if quit_button:
-		quit_button.pressed.connect(_on_quit_pressed)
+func _bind(button: Button, handler: Callable) -> void:
+	if button == null:
+		push_warning("MainMenu: a button slot is empty in the Inspector.")
+		return
+	button.pressed.connect(handler)
 
+func _disable_if_missing(button: Button, scene_path: String) -> void:
+	if button != null:
+		button.disabled = not ResourceLoader.exists(scene_path)
 
-# ==================================================
-# PLAY
-# ==================================================
+func _open(scene_path: String) -> bool:
+	if not ResourceLoader.exists(scene_path):
+		push_warning("MainMenu: scene not found: '%s'" % scene_path)
+		return false
+	get_tree().change_scene_to_file(scene_path)
+	return true
 
-func _on_play_pressed() -> void:
-	if play_scene != "":
-		get_tree().change_scene_to_file(play_scene)
-
-
-# ==================================================
-# LOAD
-# ==================================================
+func _on_start_pressed() -> void:
+	# Only flip GameState to PLAYING if the game scene is really going to load.
+	if _open(start_scene):
+		GameState.start_game()
 
 func _on_load_pressed() -> void:
-	if load_scene != "":
-		get_tree().change_scene_to_file(load_scene)
-
-
-# ==================================================
-# SETTINGS
-# ==================================================
+	_open(load_scene)
 
 func _on_settings_pressed() -> void:
-	if settings_scene != "":
-		get_tree().change_scene_to_file(settings_scene)
-
-
-# ==================================================
-# QUIT
-# ==================================================
+	_open(settings_scene)
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
