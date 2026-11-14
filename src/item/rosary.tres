@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://b1xdqusvtylk8"]
+
+[ext_resource type="Script" uid="uid://cr6mxwtpa2ixi" path="res://src/item/item_data.gd" id="1_sk2f0"]
+
+[resource]
+script = ExtResource("1_sk2f0")
+id = &"rosary"
+display_name = "Rosary"
+use_action = &"save_game"
+metadata/_custom_type_script = "uid://cr6mxwtpa2ixi"

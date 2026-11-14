@@ -7,7 +7,7 @@ signal item_added(item: ItemData, slot: int)
 signal item_removed(item: ItemData, slot: int)
 signal selection_changed(slot: int)
 signal ui_toggled(is_open: bool)
-
+signal item_used(item: ItemData, slot: int)
 
 const MAX_SLOTS: int = 10
 
@@ -16,6 +16,30 @@ var selected_slot: int = -1
 
 var _slots: Array[ItemData] = []
 var is_ui_open: bool = false
+
+func _ready() -> void:
+	add_to_group("saveable")
+
+func capture_state() -> Dictionary:
+	var paths: Array = []
+	for item in _slots:
+		paths.append(item.resource_path if item != null else "")
+	return {"slots": paths, "selected": selected_slot}
+
+func restore_state(state: Dictionary) -> void:
+	for i in MAX_SLOTS:
+		remove_item(i)
+	var paths: Array = state.get("slots", [])
+	for i in mini(paths.size(), MAX_SLOTS):
+		var path: String = paths[i]
+		if path == "" or not ResourceLoader.exists(path):
+			continue
+		var item := load(path) as ItemData
+		if item == null:
+			continue
+		_slots[i] = item
+		item_added.emit(item, i)
+	select_slot(state.get("selected", -1))
 
 func _init() -> void:
 	_slots.resize(MAX_SLOTS)
@@ -83,6 +107,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("inventory"):
 		set_ui_open(not is_ui_open)
+		return
+	if event.is_action_pressed("use_item"):
+		var held := get_selected_item()
+		if held != null and held.use_action != &"":
+			item_used.emit(held, selected_slot)
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var keycode: int = event.physical_keycode

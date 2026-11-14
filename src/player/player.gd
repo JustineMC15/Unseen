@@ -33,6 +33,7 @@ var _pitch_half_range: float = 0.0
 
 func _ready() -> void:
 	add_to_group("player")
+	add_to_group("saveable")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_camera_rest_position = camera.position
 
@@ -107,3 +108,23 @@ func lock_controls(yaw_center: float, yaw_half_range_deg: float, pitch_half_rang
 func unlock_controls() -> void:
 	controls_locked = false
 	_look_limited = false
+
+func capture_state() -> Dictionary:
+	return {
+		"position": global_position,
+		"yaw": rotation.y,
+		"pitch": head.rotation.x,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	unlock_controls()
+	velocity = Vector3.ZERO
+	global_position = state.get("position", global_position)
+	rotation.y = state.get("yaw", rotation.y)
+	head.rotation.x = state.get("pitch", 0.0)
+
+func get_save_summary() -> Dictionary:
+	var tracker := LocationTracker.find_on(self)
+	if tracker == null:
+		return {}
+	return {"room_id": tracker.room_id, "floor_id": tracker.floor_id}

@@ -30,6 +30,7 @@ var _move_direction: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	add_to_group("gaze_watchable")
+	add_to_group("saveable")
 	floor_snap_length = 0.5
 	for child in get_children():
 		if child is LocationTracker:
@@ -119,3 +120,19 @@ func face_movement(turn_speed: float, delta: float) -> void:
 	if _move_direction == Vector3.ZERO:
 		return
 	face_towards(global_position + _move_direction, turn_speed, delta)
+
+func capture_state() -> Dictionary:
+	return {
+		"position": global_position,
+		"yaw": rotation.y,
+		"state": state_machine.current_state_name,
+		"last_known": last_known_player_position,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	velocity = Vector3.ZERO
+	_path = PackedVector3Array()
+	global_position = state.get("position", global_position)
+	rotation.y = state.get("yaw", rotation.y)
+	state_machine.force_transition(state.get("state", "Patrol"))
+	last_known_player_position = state.get("last_known", last_known_player_position)

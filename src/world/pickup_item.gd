@@ -3,6 +3,15 @@ extends Interactable
 
 @export var item: ItemData
 
+func _ready() -> void:
+	add_to_group("saveable")
+
+func capture_state() -> Dictionary:
+	return {"present": true}
+
+func on_missing_from_save() -> void:
+	queue_free()
+
 func get_prompt(_interactor: Interactor) -> String:
 	if item == null or not enabled:
 		return ""

@@ -25,6 +25,7 @@ var _tween: Tween
 func _ready() -> void:
 	is_locked = required_item_id != &""
 	_closed_y = rotation.y
+	add_to_group("saveable")
 
 func get_prompt(interactor: Interactor) -> String:
 	if not enabled:
@@ -83,3 +84,13 @@ func _set_open(value: bool) -> void:
 		opened.emit()
 	else:
 		closed.emit()
+
+func capture_state() -> Dictionary:
+	return {"locked": is_locked, "open": is_open}
+
+func restore_state(state: Dictionary) -> void:
+	is_locked = state.get("locked", is_locked)
+	is_open = state.get("open", is_open)
+	if _tween:
+		_tween.kill()
+	rotation.y = _closed_y + (deg_to_rad(open_angle_deg) if is_open else 0.0)

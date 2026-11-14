@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://dnmwt2wd47422" path="res://src/player/interactor.gd" id="6_x42xx"]
 [ext_resource type="Script" uid="uid://c3yk3cswja0fo" path="res://src/entity/location_tracker.gd" id="8_l271a"]
 [ext_resource type="Script" uid="uid://bcei4bofmtcfx" path="res://src/player/footstep_noise.gd" id="9_8ydov"]
+[ext_resource type="Script" uid="uid://dovm8o48y6y4s" path="res://src/save/save_system.gd" id="10_8ydov"]
+[ext_resource type="Script" uid="uid://ba6sx4xemi8jk" path="res://src/save/save_item_controller.gd" id="10_ylhto"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 radius = 0.4
@@ -53,3 +55,12 @@ script = ExtResource("8_l271a")
 
 [node name="Footsteps" type="Node" parent="." unique_id=349913420]
 script = ExtResource("9_8ydov")
+
+[node name="SaveItemController" type="Node" parent="." unique_id=2043725154 node_paths=PackedStringArray("inventory", "save_system", "interactor")]
+script = ExtResource("10_ylhto")
+inventory = NodePath("../Inventory")
+save_system = NodePath("../SaveSystem")
+interactor = NodePath("../Interactor")
+
+[node name="SaveSystem" type="Node" parent="." unique_id=1399651836]
+script = ExtResource("10_8ydov")

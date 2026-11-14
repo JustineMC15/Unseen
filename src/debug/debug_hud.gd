@@ -60,3 +60,14 @@ func _refresh_items() -> void:
 			# The 10th slot is the 0 key.
 			parts.append("%s[%d] %s" % [marker, (i + 1) % 10, slots[i].display_name])
 	_items.text = "Items: " + ("empty" if parts.is_empty() else "  ".join(parts))
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F5:
+			var system := get_tree().get_first_node_in_group("save_system") as SaveSystem
+			if system:
+				print("Saved slot 1: ", system.save_to_slot(0))
+		elif event.keycode == KEY_F9:
+			var path := SaveStore.begin_load(0)
+			if path != "":
+				GameState.start_game(path)

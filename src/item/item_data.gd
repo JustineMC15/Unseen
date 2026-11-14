@@ -5,5 +5,6 @@ extends Resource
 ## Used to match items to doors, e.g. &"key_classroom_201".
 @export var id: StringName
 @export var display_name: String = ""
+@export var use_action: StringName = &""
 @export_multiline var description: String = ""
 @export var icon: Texture2D
