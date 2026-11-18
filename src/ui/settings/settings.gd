@@ -1,4 +1,3 @@
-
 extends Control
 
 @export_file("*.tscn") var back_scene: String = "res://src/ui/main_menu/main_menu.tscn"
@@ -15,6 +14,12 @@ extends Control
 
 
 func _ready() -> void:
+	# Show the volumes the buses actually have (they persist while the scene changes).
+	# Set before connecting, so loading the screen doesn't re-apply the same values.
+	master_slider.value = SoundManager.get_bus_percent(&"Master")
+	music_slider.value = SoundManager.get_bus_percent(&"Music")
+	sfx_slider.value = SoundManager.get_bus_percent(&"SFX")
+
 	master_slider.value_changed.connect(_on_master_changed)
 	music_slider.value_changed.connect(_on_music_changed)
 	sfx_slider.value_changed.connect(_on_sfx_changed)
@@ -26,14 +31,17 @@ func _ready() -> void:
 
 func _on_master_changed(value: float) -> void:
 	master_value.text = str(int(value)) + "%"
+	SoundManager.set_bus_percent(&"Master", value)
 
 
 func _on_music_changed(value: float) -> void:
 	music_value.text = str(int(value)) + "%"
+	SoundManager.set_bus_percent(&"Music", value)
 
 
 func _on_sfx_changed(value: float) -> void:
 	sfx_value.text = str(int(value)) + "%"
+	SoundManager.set_bus_percent(&"SFX", value)
 
 
 func _update_volume_labels() -> void:
