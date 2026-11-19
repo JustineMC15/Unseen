@@ -1,6 +1,16 @@
 class_name AIEntity
 extends CharacterBody3D
 
+signal woke
+signal slept
+signal detect_started
+signal detect_ended
+signal chase_started
+signal chase_ended
+signal caught_player 
+
+@export var starts_dormant: bool = false
+
 @export var perception: EntityPerception
 @export var state_machine: AIStateMachine
 @export var nav_agent: NavigationAgent3D
@@ -28,9 +38,12 @@ var _path_target: Vector3 = Vector3.INF
 var _repath_left: float = 0.0
 var _move_direction: Vector3 = Vector3.ZERO
 
+var is_active: bool = true
+var _default_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
+
 func _ready() -> void:
+	_default_process_mode = process_mode
 	add_to_group("gaze_watchable")
-	add_to_group("saveable")
 	floor_snap_length = 0.5
 	for child in get_children():
 		if child is LocationTracker:
@@ -41,6 +54,31 @@ func _ready() -> void:
 		push_warning("AIEntity: add a LocationTracker child.")
 	if hearing:
 		hearing.noise_alert.connect(_on_noise_alert)
+	if state_machine:
+		state_machine.state_changed.connect(_on_state_changed)
+	if starts_dormant:
+		sleep()
+
+## Invisible, no physics body, no AI. Also usable mid-game.
+func sleep() -> void:
+	if not is_active:
+		return
+	is_active = false
+	visible = false
+	velocity = Vector3.ZERO
+	_path = PackedVector3Array()
+	process_mode = Node.PROCESS_MODE_DISABLED
+	slept.emit()
+
+## Starts the entity from wherever it is placed in Patrol.
+func wake() -> void:
+	if is_active:
+		return
+	is_active = true
+	visible = true
+	process_mode = _default_process_mode
+	state_machine.force_transition("Patrol")
+	woke.emit()
 
 func _physics_process(delta: float) -> void:
 	var sees_player := perception.can_see_player()
@@ -127,6 +165,7 @@ func capture_state() -> Dictionary:
 		"yaw": rotation.y,
 		"state": state_machine.current_state_name,
 		"last_known": last_known_player_position,
+		"is_active": is_active,
 	}
 
 func restore_state(state: Dictionary) -> void:
@@ -134,5 +173,16 @@ func restore_state(state: Dictionary) -> void:
 	_path = PackedVector3Array()
 	global_position = state.get("position", global_position)
 	rotation.y = state.get("yaw", rotation.y)
+	is_active = state.get("is_active", true)
 	state_machine.force_transition(state.get("state", "Patrol"))
 	last_known_player_position = state.get("last_known", last_known_player_position)
+
+func _on_state_changed(previous: String, new_state: String) -> void:
+	if previous == "Detect":
+		detect_ended.emit()
+	if previous == "Chase":
+		chase_ended.emit()
+	if new_state == "Detect":
+		detect_started.emit()
+	elif new_state == "Chase":
+		chase_started.emit()

@@ -39,6 +39,8 @@ func _on_noise_emitted(
 	floor_id: int,
 	world_position: Vector3
 ) -> void:
+	if not can_process():
+		return
 	if _location == null:
 		return
 	var heard := _heard_loudness(loudness, room_id, floor_id)

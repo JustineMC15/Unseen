@@ -30,6 +30,8 @@ var _look_limited: bool = false
 var _yaw_center: float = 0.0
 var _yaw_half_range: float = 0.0
 var _pitch_half_range: float = 0.0
+# Used in locker tween
+var _look_frozen: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
@@ -38,7 +40,7 @@ func _ready() -> void:
 	_camera_rest_position = camera.position
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not _look_frozen:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		head.rotate_x(-event.relative.y * mouse_sensitivity)
 		var pitch_min := deg_to_rad(min_pitch_deg)
@@ -104,10 +106,17 @@ func lock_controls(yaw_center: float, yaw_half_range_deg: float, pitch_half_rang
 	rotation.y = yaw_center
 	head.rotation.x = 0.0
 	camera.position = _camera_rest_position
+	_look_frozen = false
 
 func unlock_controls() -> void:
 	controls_locked = false
 	_look_limited = false
+	_look_frozen = false
+
+func freeze_controls() -> void:
+	controls_locked = true
+	velocity = Vector3.ZERO
+	_look_frozen = true
 
 func capture_state() -> Dictionary:
 	return {

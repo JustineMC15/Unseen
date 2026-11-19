@@ -10,11 +10,14 @@ extends Area3D
 @onready var _entity := get_parent() as AIEntity
 
 func _physics_process(_delta: float) -> void:
-	if _entity == null or not catch_state_names.has(_entity.state_machine.current_state_name):
+	if _entity == null or not GameState.is_playing():
+		return
+	if not catch_state_names.has(_entity.state_machine.current_state_name):
 		return
 	# Checked every frame (not body_entered) so a player already standing inside
 	# the area when a lethal state starts still gets caught.
 	for body in get_overlapping_bodies():
 		if body.is_in_group(player_group):
+			_entity.caught_player.emit()
 			GameState.game_over()
 			return

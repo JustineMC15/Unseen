@@ -29,6 +29,9 @@ route = NodePath("../../../PatrolRoute")
 [node name="Player" parent="." unique_id=1715769690 instance=ExtResource("4_dh68a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 16.6, -21)
 
+[node name="StaticOverlay" parent="Player" index="9" unique_id=574602868 node_paths=PackedStringArray("entity")]
+entity = NodePath("../../Unseen")
+
 [node name="PatrolRoute" type="Node3D" parent="." unique_id=467712040]
 script = ExtResource("5_y58e2")
 metadata/_custom_type_script = "uid://cubqoi8dqbcuk"
@@ -52,3 +55,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63, 5.5, -28)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47, 5.5, -21)
 
 [editable path="Unseen"]
+[editable path="Player"]

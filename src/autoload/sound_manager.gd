@@ -237,3 +237,9 @@ func _ensure_bus(bus_name: StringName) -> void:
 	var index := AudioServer.bus_count - 1
 	AudioServer.set_bus_name(index, bus_name)
 	AudioServer.set_bus_send(index, &"Master")
+
+# Make sure to connect these for audio of vignette
+#entity.detect_started.connect(_detect_sting.play)
+#entity.chase_started.connect(_chase_loop.play)
+#entity.chase_ended.connect(_chase_loop.stop)
+#entity.caught_player.connect(_catch_scream.play)
