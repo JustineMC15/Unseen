@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://caobhw3rhw7ga"]
 
 [ext_resource type="NavigationMesh" uid="uid://c0eakaxmhy2ky" path="res://assets/building/olopsc_navmesh.tres" id="1_66la8"]
-[ext_resource type="PackedScene" uid="uid://dqw1yeymp8ilg" path="res://assets/building/Olopsc_Building.glb" id="2_txx5u"]
+[ext_resource type="PackedScene" uid="uid://bdh5risexenqt" path="res://assets/building/olopsc_building(1).tscn" id="2_y58e2"]
 [ext_resource type="PackedScene" uid="uid://cbyxqy5odeip3" path="res://src/entity/unseen.tscn" id="3_txx5u"]
 [ext_resource type="Script" uid="uid://djpsapu1257qf" path="res://src/debug/debug_hud.gd" id="3_y58e2"]
 [ext_resource type="PackedScene" uid="uid://ccfsqp0kteono" path="res://src/player/player.tscn" id="4_dh68a"]
@@ -12,7 +12,7 @@
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=697237743]
 navigation_mesh = ExtResource("1_66la8")
 
-[node name="Olopsc_Building" parent="NavigationRegion3D" unique_id=1072238156 instance=ExtResource("2_txx5u")]
+[node name="Olopsc_Building(1)" parent="NavigationRegion3D" unique_id=1605538008 instance=ExtResource("2_y58e2")]
 
 [node name="DebugHUD" type="CanvasLayer" parent="." unique_id=1521475044]
 script = ExtResource("3_y58e2")

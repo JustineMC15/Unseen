@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://vhxjvd2g3q2o"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_jjgpa"]
+[ext_resource type="AudioStream" uid="uid://cghdqm16m5d71" path="res://assets/audio/horror-tension-sfx-lite/music_box_02.wav" id="2_g2vum"]
+
+[resource]
+script = ExtResource("1_jjgpa")
+id = &"game_over"
+streams = Array[AudioStream]([ExtResource("2_g2vum")])
+metadata/_custom_type_script = "uid://brgirdsoro74i"

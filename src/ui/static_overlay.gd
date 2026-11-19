@@ -10,8 +10,8 @@ const DEFAULT_SHADER: Shader = preload("res://src/ui/effects/static_vignette.gds
 	"Patrol": 0.0,
 	"Investigate": 0.12,
 	"Search": 0.2,
-	"Detect": 0.4,
-	"Chase": 0.6,
+	"Detect": 0.3,
+	"Chase": 0.5,
 }
 ## Intensity per second when getting stronger / weaker.
 @export var rise_speed: float = 4.0

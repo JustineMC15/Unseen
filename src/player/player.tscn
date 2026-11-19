@@ -70,6 +70,7 @@ script = ExtResource("10_8ydov")
 
 [node name="StaticOverlay" type="CanvasLayer" parent="." unique_id=574602868]
 script = ExtResource("12_cwolq")
+go_to_menu_on_game_over = false
 metadata/_custom_type_script = "uid://bcp6psyj4ip41"
 
 [node name="WakeUpSequence" type="Node" parent="." unique_id=1148348262]

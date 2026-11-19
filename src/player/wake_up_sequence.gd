@@ -23,7 +23,7 @@ var _material: ShaderMaterial
 var _tween: Tween
 
 func _ready() -> void:
-	if not enabled:
+	if not enabled or SaveStore.has_pending():
 		return
 	_player = get_parent() as Player
 	if _player == null:

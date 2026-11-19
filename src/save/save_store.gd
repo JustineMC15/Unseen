@@ -87,3 +87,14 @@ static func take_pending() -> Dictionary:
 
 static func _path(slot: int) -> String:
 	return "%s/slot_%d.save" % [SAVE_DIR, slot + 1]
+
+static func get_slot_label(slot: int) -> String:
+	var info := get_slot_info(slot)
+	var title := "Slot %d" % (slot + 1)
+	if not info.get("exists", false):
+		return title + " - Empty"
+	var label: String = "%s - %s" % [title, info.get("saved_at_text", "")]
+	var room := str(info.get("summary", {}).get("room_id", ""))
+	if room != "":
+		label += " - " + room
+	return label

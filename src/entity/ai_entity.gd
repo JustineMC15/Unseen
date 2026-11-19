@@ -43,6 +43,7 @@ var _default_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
 
 func _ready() -> void:
 	_default_process_mode = process_mode
+	add_to_group("saveable")
 	add_to_group("gaze_watchable")
 	floor_snap_length = 0.5
 	for child in get_children():

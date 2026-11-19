@@ -3,10 +3,14 @@
 [ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_je22x"]
 [ext_resource type="AudioStream" uid="uid://n6jim5huax7h" path="res://assets/audio/Haunted-Atmosphere-FREE-Lite/01_full_mixes/foggy_graveyard_mix_loop.wav" id="2_g2te0"]
 [ext_resource type="AudioStream" uid="uid://c4jogs0q3w5v7" path="res://assets/audio/Haunted-Atmosphere-FREE-Lite/01_full_mixes/haunted_house_mix_loop.wav" id="3_oa02d"]
+[ext_resource type="AudioStream" uid="uid://dqoiyl5vhsj3s" path="res://assets/audio/atmosmoody/atmoseerie01.mp3.wav" id="4_51ftg"]
+[ext_resource type="AudioStream" uid="uid://d4bkb5p2wugi" path="res://assets/audio/atmosmoody/atmoseerie02.mp3.wav" id="5_hngmo"]
+[ext_resource type="AudioStream" uid="uid://cyh74wak8i3ht" path="res://assets/audio/atmosmoody/atmoseerie03.mp3.wav" id="6_rtpbs"]
+[ext_resource type="AudioStream" uid="uid://sxfuw1c8ifpo" path="res://assets/audio/atmosmoody/atmoseerie04.mp3.wav" id="7_vl1c7"]
 
 [resource]
 script = ExtResource("1_je22x")
 id = &"ambience"
-streams = Array[AudioStream]([ExtResource("2_g2te0"), ExtResource("3_oa02d")])
-volume_db = -6.0
+streams = Array[AudioStream]([ExtResource("2_g2te0"), ExtResource("3_oa02d"), ExtResource("4_51ftg"), ExtResource("5_hngmo"), ExtResource("6_rtpbs"), ExtResource("7_vl1c7")])
+volume_db = -10.0
 metadata/_custom_type_script = "uid://brgirdsoro74i"

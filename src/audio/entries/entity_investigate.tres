@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://dx428igpos2en"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_sfpan"]
+[ext_resource type="AudioStream" uid="uid://d30fq1lgfm2f4" path="res://assets/audio/horror-tension-sfx-lite/heartbeat_slow_01.wav" id="2_ch863"]
+
+[resource]
+script = ExtResource("1_sfpan")
+id = &"entity_investigate"
+streams = Array[AudioStream]([ExtResource("2_ch863")])
+volume_db = -6.0
+metadata/_custom_type_script = "uid://brgirdsoro74i"

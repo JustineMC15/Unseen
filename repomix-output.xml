@@ -1,0 +1,3660 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/*.gd
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+src/
+  audio/
+    sound_entry.gd
+  autoload/
+    game_state.gd
+    gaze_system.gd
+    noise_manager.gd
+    sound_manager.gd
+  debug/
+    debug_hud.gd
+  entity/
+    states/
+      chase_state.gd
+      detect_state.gd
+      investigate_state.gd
+      patrol_state.gd
+      search_state.gd
+    ai_entity.gd
+    ai_state_machine.gd
+    ai_state.gd
+    entity_catch.gd
+    entity_hearing.gd
+    entity_perception.gd
+    location_tracker.gd
+  item/
+    item_data.gd
+  player/
+    camera_shake.gd
+    concealment.gd
+    flashlight.gd
+    footstep_noise.gd
+    interactor.gd
+    inventory.gd
+    player_gaze_caster.gd
+    player.gd
+    wake_up_sequence.gd
+  save/
+    save_item_controller.gd
+    save_store.gd
+    save_system.gd
+  ui/
+    game_menu/
+      interaction_hud.gd
+      inventory_bar.gd
+      state_screen.gd
+    main_menu/
+      horror_button.gd
+      main_menu.gd
+    settings/
+      settings.gd
+    gaze_distortion.gd
+    static_overlay.gd
+  world/
+    building_navigation.gd
+    door.gd
+    exit_trigger.gd
+    hiding_spot.gd
+    interactable.gd
+    light_flicker.gd
+    locker.gd
+    patrol_route.gd
+    pickup_item.gd
+    player_trigger.gd
+    room_zone.gd
+    room.gd
+    scare_trigger.gd
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/audio/sound_entry.gd">
+## One named sound. Create .tres files from this (FileSystem > New Resource > SoundEntry),
+## then add them to the "entries" list on the SoundManager scene.
+## No code needed: set the id, drag audio files into "streams", done.
+class_name SoundEntry
+extends Resource
+
+## The name the game asks for, e.g. &"footstep_walk". Must match the list at the top of sound_manager.gd.
+@export var id: StringName
+## Add several files for variation. One is picked at random each time, never the same one twice in a row.
+@export var streams: Array[AudioStream] = []
+@export_range(-40.0, 12.0, 0.5) var volume_db: float = 0.0
+## Random pitch change. 0.1 means up to 10% higher or lower, so repeated footsteps don't sound identical.
+@export_range(0.0, 0.5, 0.01) var pitch_variation: float = 0.05
+## Which volume slider controls it. Use Music for chase_music, Ambience for ambience, SFX for the rest.
+@export_enum("SFX", "Music", "Ambience") var bus: String = "SFX"
+## Only for sounds that come from a spot in the world (doors, footsteps, the entity).
+## Past this distance (meters) the sound is silent.
+@export var max_distance: float = 30.0
+</file>
+
+<file path="src/autoload/gaze_system.gd">
+extends Node
+
+signal gaze_started(target: Node3D)
+signal gaze_ended(target: Node3D)
+
+var _watched: Dictionary = {}   # Node3D -> float (seconds held)
+
+func report(target: Node3D, is_watching: bool, delta: float) -> void:
+	if is_watching:
+		if not _watched.has(target):
+			_watched[target] = 0.0
+			gaze_started.emit(target)
+		_watched[target] += delta
+	elif _watched.has(target):
+		_watched.erase(target)
+		gaze_ended.emit(target)
+
+func is_watched(target: Node3D) -> bool:
+	return _watched.has(target)
+
+func get_watched_duration(target: Node3D) -> float:
+	return _watched.get(target, 0.0)
+</file>
+
+<file path="src/autoload/noise_manager.gd">
+extends Node
+
+signal noise_emitted(
+	noise_type: StringName,
+	loudness: float,
+	room_id: StringName,
+	floor_id: int,
+	world_position: Vector3
+)
+
+func emit_noise(
+	noise_type: StringName,
+	loudness: float,
+	room_id: StringName,
+	floor_id: int,
+	world_position: Vector3
+) -> void:
+	noise_emitted.emit(noise_type, loudness, room_id, floor_id, world_position)
+</file>
+
+<file path="src/entity/location_tracker.gd">
+class_name LocationTracker
+extends Node
+
+signal location_changed(room_id: StringName, floor_id: int)
+
+var room_id: StringName = &""
+# Records the current room the entity is in
+var floor_id: int = 0
+# Starts with 0, not in any room yet
+
+# Zones the body is inside right now, most recently entered last.
+var _zones: Array[RoomZone] = []
+
+static func find_on(node: Node) -> LocationTracker:
+	if node == null:
+		return null
+	for child in node.get_children():
+		if child is LocationTracker:
+			return child as LocationTracker
+	return null
+
+func zone_entered(zone: RoomZone) -> void:
+	_zones.erase(zone)
+	_zones.append(zone)
+	_refresh()
+
+func zone_exited(zone: RoomZone) -> void:
+	_zones.erase(zone)
+	_refresh()
+
+func _refresh() -> void:
+	if _zones.is_empty():
+		return # Between rooms: keep the last known location.
+	var zone: RoomZone = _zones.back()
+	if zone.room_id == room_id and zone.floor_id == floor_id:
+		return
+	room_id = zone.room_id
+	floor_id = zone.floor_id
+	location_changed.emit(room_id, floor_id)
+</file>
+
+<file path="src/player/camera_shake.gd">
+## Put this on a Node that is a child of the player's Camera3D.
+## Shakes with h_offset / v_offset so it doesn't fight the head bob (which moves position).
+## Runs while the tree is paused, so the shake still plays on the game over freeze.
+class_name CameraShake
+extends Node
+
+@export var camera: Camera3D
+@export var shake_on_game_over: bool = true
+@export var game_over_strength: float = 0.15
+@export var game_over_duration: float = 0.8
+
+var _strength: float = 0.0
+var _duration: float = 0.0
+var _time_left: float = 0.0
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	if camera == null:
+		camera = get_parent() as Camera3D
+	GameState.state_changed.connect(_on_game_state_changed)
+
+## strength is in meters of camera offset (0.05 is subtle, 0.2 is violent).
+func shake(strength: float, duration: float) -> void:
+	_strength = strength
+	_duration = maxf(duration, 0.01)
+	_time_left = _duration
+
+func _process(delta: float) -> void:
+	if _time_left <= 0.0 or camera == null:
+		return
+	_time_left = maxf(_time_left - delta, 0.0)
+	var amount := _strength * (_time_left / _duration)
+	camera.h_offset = randf_range(-1.0, 1.0) * amount
+	camera.v_offset = randf_range(-1.0, 1.0) * amount
+
+func _on_game_state_changed(_previous: GameState.State, new_state: GameState.State) -> void:
+	if shake_on_game_over and new_state == GameState.State.GAME_OVER:
+		shake(game_over_strength, game_over_duration)
+</file>
+
+<file path="src/player/flashlight.gd">
+## Put this on a SpotLight3D that is a child of the player's Camera3D.
+## Needs an Input Map action named "flashlight" (e.g. F).
+class_name Flashlight
+extends SpotLight3D
+
+signal toggled(is_on: bool)
+
+@export var toggle_action: StringName = &"flashlight"
+@export var starts_on: bool = true
+
+func _ready() -> void:
+	visible = starts_on
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(toggle_action) and GameState.is_playing():
+		set_on(not visible)
+
+func is_on() -> bool:
+	return visible
+
+func set_on(value: bool) -> void:
+	if value == visible:
+		return
+	visible = value
+	toggled.emit(value)
+</file>
+
+<file path="src/player/footstep_noise.gd">
+class_name FootstepNoise
+extends Node
+
+# Based on velocity
+@export var walk_loudness: float = 0.15
+@export var sprint_loudness: float = 0.4
+# Meters walked per step noise.
+@export var walk_stride: float = 2.0
+@export var sprint_stride: float = 2.5
+@export var sprint_action: StringName = &"sprint"
+
+var _body: CharacterBody3D
+var _location: LocationTracker
+var _distance: float = 0.0
+
+func _ready() -> void:
+	_body = get_parent() as CharacterBody3D
+	_location = LocationTracker.find_on(_body)
+
+func _physics_process(delta: float) -> void:
+	if _body == null or not _body.is_on_floor():
+		return
+	var speed := Vector2(_body.velocity.x, _body.velocity.z).length()
+	if speed < 0.5:
+		return
+	var sprinting := Input.is_action_pressed(sprint_action)
+	_distance += speed * delta
+	if _distance < (sprint_stride if sprinting else walk_stride):
+		return
+	_distance = 0.0
+	NoiseManager.emit_noise(
+		&"footstep_sprint" if sprinting else &"footstep_walk",
+		sprint_loudness if sprinting else walk_loudness,
+		_location.room_id if _location else &"",
+		_location.floor_id if _location else 0,
+		_body.global_position
+	)
+</file>
+
+<file path="src/player/wake_up_sequence.gd">
+class_name WakeUpSequence
+extends Node
+
+signal started        # screen is black; start breathing / ambience here
+signal eyes_opened    # the first flutter begins
+signal finished
+
+const SHADER: Shader = preload("res://src/ui/effects/eyelid_open.gdshader")
+
+@export var enabled: bool = true
+## Seconds of black before the eyes start to open.
+@export var start_delay: float = 1.0
+## Negative looks down.
+@export var start_pitch_deg: float = -65.0
+## Metres the head starts below its normal height.
+@export var head_drop: float = 0.5
+## Seconds for the camera to rise to eye level.
+@export var camera_time: float = 4.2
+
+var _player: Player
+var _layer: CanvasLayer
+var _material: ShaderMaterial
+var _tween: Tween
+
+func _ready() -> void:
+	if not enabled:
+		return
+	_player = get_parent() as Player
+	if _player == null:
+		push_warning("WakeUpSequence: must be a child of the Player.")
+		return
+	# Black immediately, so the scene never flashes before the animation starts.
+	_build_overlay()
+	# The Player's @onready vars (head, camera) are not set until its own _ready has run.
+	await get_tree().process_frame
+	_play()
+
+func _build_overlay() -> void:
+	_layer = CanvasLayer.new()
+	_layer.layer = 100
+	add_child(_layer)
+	var rect := ColorRect.new()
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_material = ShaderMaterial.new()
+	_material.shader = SHADER
+	_material.set_shader_parameter("open", 0.0)
+	_material.set_shader_parameter("blur", 1.0)
+	rect.material = _material
+	_layer.add_child(rect)
+	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+func _play() -> void:
+	var head := _player.head
+	var rest_y := head.position.y
+	head.rotation.x = deg_to_rad(start_pitch_deg)
+	head.position.y = rest_y - head_drop
+	_player.freeze_controls()
+	started.emit()
+
+	# Eyelids: flutter open, blink, open more, blink, open fully.
+	_tween = create_tween()
+	_tween.tween_interval(start_delay)
+	_tween.tween_callback(eyes_opened.emit)
+	_lid(0.30, 0.9, 0.9)
+	_lid(0.04, 0.35, 1.0)
+	_lid(0.65, 0.8, 0.55)
+	_lid(0.12, 0.3, 0.7)
+	_lid(1.0, 1.4, 0.0)
+
+	# Camera: starts a moment after the eyes begin to open. Finishing it ends the sequence.
+	var delay := start_delay + 0.3
+	var cam := create_tween().set_parallel(true)
+	cam.tween_property(head, "rotation:x", 0.0, camera_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).set_delay(delay)
+	cam.tween_property(head, "position:y", rest_y, camera_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT).set_delay(delay)
+	cam.finished.connect(_finish)
+
+func _lid(open_to: float, time: float, blur_to: float) -> void:
+	_tween.tween_property(_material, "shader_parameter/open", open_to, time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.parallel().tween_property(_material, "shader_parameter/blur", blur_to, time)
+
+func _finish() -> void:
+	if _tween:
+		_tween.kill()
+	_layer.queue_free()
+	_player.unlock_controls()
+	finished.emit()
+</file>
+
+<file path="src/save/save_item_controller.gd">
+class_name SaveItemController
+extends Node
+
+signal picker_requested
+signal saved(slot: int)
+signal cancelled
+
+@export var inventory: Inventory
+@export var save_system: SaveSystem
+# Optional. Used only to show "Game saved." through the usual feedback message.
+@export var interactor: Interactor
+@export var save_action: StringName = &"save_game"
+# If true, each rosary is used up by one save.
+@export var consume_item: bool = true
+
+var _pending_inventory_slot: int = -1
+
+func _ready() -> void:
+	add_to_group("save_item_controller")
+	if inventory == null or save_system == null:
+		push_warning("SaveItemController: assign 'inventory' and 'save_system' in the Inspector.")
+		return
+	inventory.item_used.connect(_on_item_used)
+
+func is_picking() -> bool:
+	return _pending_inventory_slot != -1
+
+func _on_item_used(item: ItemData, inventory_slot: int) -> void:
+	if item.use_action != save_action or is_picking():
+		return
+	_pending_inventory_slot = inventory_slot
+	picker_requested.emit()
+
+## Called by the UI with the slot the player picked (0-3). Returns true if saved.
+func confirm(save_slot: int) -> bool:
+	if not is_picking():
+		return false
+	# The rosary is removed BEFORE saving, so the save file does not contain it.
+	# Otherwise loading that save would hand the rosary back for free.
+	var used: ItemData = null
+	if consume_item:
+		used = inventory.remove_item(_pending_inventory_slot)
+	var ok := save_system.save_to_slot(save_slot)
+	if not ok and used != null:
+		inventory.add_item(used)
+	_pending_inventory_slot = -1
+	if ok:
+		saved.emit(save_slot)
+		if interactor != null:
+			interactor.show_feedback("Game saved.")
+	return ok
+
+# Called by the UI when the player backs out of the slot picker. The rosary is kept.
+func cancel() -> void:
+	if not is_picking():
+		return
+	_pending_inventory_slot = -1
+	cancelled.emit()
+</file>
+
+<file path="src/save/save_store.gd">
+class_name SaveStore
+extends RefCounted
+
+const SLOT_COUNT: int = 4
+const SAVE_DIR: String = "user://saves"
+const SAVE_VERSION: int = 1
+
+static var _pending: Dictionary = {}
+
+static func is_valid_slot(slot: int) -> bool:
+	return slot >= 0 and slot < SLOT_COUNT
+
+static func slot_exists(slot: int) -> bool:
+	return is_valid_slot(slot) and FileAccess.file_exists(_path(slot))
+
+static func get_slot_info(slot: int) -> Dictionary:
+	var data := read_slot(slot)
+	if data.is_empty():
+		return {"exists": false}
+	var saved_at: int = data.get("saved_at", 0)
+	var bias_seconds: int = Time.get_time_zone_from_system().bias * 60
+	return {
+		"exists": true,
+		"saved_at": saved_at,
+		"saved_at_text": Time.get_datetime_string_from_unix_time(saved_at + bias_seconds, true),
+		"scene": data.get("scene", ""),
+		"summary": data.get("summary", {}),
+	}
+
+# Overwrites the slot. Adds the version and the save time itself.
+static func write_slot(slot: int, data: Dictionary) -> bool:
+	if not is_valid_slot(slot):
+		push_warning("SaveStore: slot %d is not valid (0-%d)." % [slot, SLOT_COUNT - 1])
+		return false
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var file := FileAccess.open(_path(slot), FileAccess.WRITE)
+	if file == null:
+		push_error("SaveStore: cannot write slot %d (error %d)." % [slot, FileAccess.get_open_error()])
+		return false
+	var stamped := data.duplicate()
+	stamped["version"] = SAVE_VERSION
+	stamped["saved_at"] = int(Time.get_unix_time_from_system())
+	file.store_string(var_to_str(stamped))
+	file.close()
+	return true
+
+# {} if the slot is empty, unreadable or from an incompatible version.
+static func read_slot(slot: int) -> Dictionary:
+	if not slot_exists(slot):
+		return {}
+	var parsed: Variant = str_to_var(FileAccess.get_file_as_string(_path(slot)))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return {}
+	if parsed.get("version", 0) != SAVE_VERSION:
+		push_warning("SaveStore: slot %d has an incompatible save version." % slot)
+		return {}
+	return parsed
+
+static func delete_slot(slot: int) -> bool:
+	if not slot_exists(slot):
+		return false
+	DirAccess.remove_absolute(_path(slot))
+	return true
+
+# Stores the slot's data for the next level and returns the scene path to open.
+# Returns "" (and warns) if the slot is empty or its scene is missing.
+static func begin_load(slot: int) -> String:
+	var data := read_slot(slot)
+	if data.is_empty():
+		push_warning("SaveStore: slot %d is empty or unreadable." % slot)
+		return ""
+	var scene_path: String = data.get("scene", "")
+	if not ResourceLoader.exists(scene_path):
+		push_warning("SaveStore: saved scene not found: '%s'" % scene_path)
+		return ""
+	_pending = data
+	return scene_path
+
+static func has_pending() -> bool:
+	return not _pending.is_empty()
+
+# Hands over the waiting data once and clears it.
+static func take_pending() -> Dictionary:
+	var data := _pending
+	_pending = {}
+	return data
+
+static func _path(slot: int) -> String:
+	return "%s/slot_%d.save" % [SAVE_DIR, slot + 1]
+</file>
+
+<file path="src/save/save_system.gd">
+class_name SaveSystem
+extends Node
+
+signal slot_saved(slot: int)
+signal loaded
+
+const GROUP: StringName = &"saveable"
+
+func _ready() -> void:
+	add_to_group("save_system")
+	if SaveStore.has_pending():
+		_restore_pending()
+
+# Saves the running level into the slot (0-3), overwriting it.
+func save_to_slot(slot: int) -> bool:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return false
+
+	var objects: Dictionary = {}
+	var summary: Dictionary = {}
+	for node in get_tree().get_nodes_in_group(GROUP):
+		var key := str(scene.get_path_to(node))
+		if node.has_method("capture_state"):
+			objects[key] = node.capture_state()
+		if node.has_method("get_save_summary"):
+			summary.merge(node.get_save_summary(), true)
+
+	var data: Dictionary = {
+		"scene": scene.scene_file_path,
+		"summary": summary,
+		"objects": objects,
+	}
+	if not SaveStore.write_slot(slot, data):
+		return false
+	slot_saved.emit(slot)
+	return true
+
+func _restore_pending() -> void:
+	# Wait a frame so every other node in the level has finished its _ready().
+	await get_tree().process_frame
+	var data := SaveStore.take_pending()
+	var scene := get_tree().current_scene
+	if scene == null or data.is_empty():
+		return
+	var saved: Dictionary = data.get("objects", {})
+	for node in get_tree().get_nodes_in_group(GROUP):
+		var key := str(scene.get_path_to(node))
+		if saved.has(key):
+			if node.has_method("restore_state"):
+				node.restore_state(saved[key])
+		elif node.has_method("on_missing_from_save"):
+			node.on_missing_from_save()
+	loaded.emit()
+</file>
+
+<file path="src/ui/game_menu/interaction_hud.gd">
+## Put this on a Control inside the HUD CanvasLayer. Replaces the prompt and feedback
+## part of debug_hud.gd. It only listens to the Interactor's signals; the Interactor
+## doesn't know the HUD exists.
+## Assign the two Labels in the Inspector. "interactor" is optional: if empty, it is
+## found on the node in group "player".
+class_name InteractionHud
+extends Control
+
+@export var interactor: Interactor
+## Shows the prompt, e.g. "[E] Open". Hidden whenever the prompt is empty.
+@export var prompt_label: Label
+## One-off messages like "It's locked." or "Inventory full."
+@export var feedback_label: Label
+## %s becomes the prompt text from the Interactor.
+@export var prompt_format: String = "[E] %s"
+@export var feedback_time: float = 2.0
+
+var _feedback_tween: Tween
+
+func _ready() -> void:
+	if prompt_label:
+		prompt_label.visible = false
+	if feedback_label:
+		feedback_label.visible = false
+	if interactor == null:
+		# Wait a frame so the Player has joined the "player" group.
+		await get_tree().process_frame
+		interactor = _find_interactor()
+	if interactor == null:
+		push_warning("InteractionHud: no Interactor assigned and none found under the player.")
+		return
+	interactor.prompt_changed.connect(_on_prompt_changed)
+	interactor.feedback.connect(_on_feedback)
+
+func _find_interactor() -> Interactor:
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null:
+		return null
+	for child in player.get_children():
+		if child is Interactor:
+			return child as Interactor
+	return null
+
+func _on_prompt_changed(text: String) -> void:
+	if prompt_label == null:
+		return
+	prompt_label.visible = text != ""
+	prompt_label.text = prompt_format % text if text != "" else ""
+
+func _on_feedback(text: String) -> void:
+	if feedback_label == null:
+		return
+	feedback_label.text = text
+	feedback_label.visible = true
+	if _feedback_tween:
+		_feedback_tween.kill()
+	_feedback_tween = create_tween()
+	_feedback_tween.tween_interval(feedback_time)
+	_feedback_tween.tween_callback(func() -> void: feedback_label.visible = false)
+</file>
+
+<file path="src/ui/game_menu/inventory_bar.gd">
+## Shows the Inventory's 10 slots on Randy's layout. It only listens to Inventory signals.
+## Layout rule: "slots_container" has one child Control per slot, in slot order (slot 1 first).
+## Inside each slot, the first TextureRect shows the item icon and the first Label shows
+## the item name. Both are optional, and a slot with extra decoration (frame, background)
+## is fine. Put the slot NUMBER label outside the slot, or it would be overwritten.
+## "inventory" is optional: if empty, it is found on the node in group "player".
+class_name InventoryBar
+extends Control
+
+@export var inventory: Inventory
+@export var slots_container: Control
+@export var normal_modulate: Color = Color.WHITE
+@export var empty_modulate: Color = Color(1.0, 1.0, 1.0, 0.4)
+@export var selected_modulate: Color = Color(1.0, 0.85, 0.3)
+## True: the bar only shows while the inventory is open (Tab). False: always visible.
+@export var show_only_when_open: bool = false
+
+var _slots: Array[Control] = []
+var _icons: Array[TextureRect] = []
+var _names: Array[Label] = []
+
+func _ready() -> void:
+	if slots_container == null:
+		push_warning("InventoryBar: assign 'slots_container' in the inspector.")
+		return
+	for child in slots_container.get_children():
+		var slot := child as Control
+		if slot == null:
+			continue
+		_slots.append(slot)
+		_icons.append(_find_icon(slot))
+		_names.append(_find_name(slot))
+	if inventory == null:
+		# Wait a frame so the Player has joined the "player" group.
+		await get_tree().process_frame
+		inventory = _find_inventory()
+	if inventory == null:
+		push_warning("InventoryBar: no Inventory assigned and none found under the player.")
+		return
+	inventory.item_added.connect(_on_slot_changed)
+	inventory.item_removed.connect(_on_slot_changed)
+	inventory.selection_changed.connect(_on_selection_changed)
+	if show_only_when_open:
+		visible = inventory.is_ui_open
+		inventory.ui_toggled.connect(_on_ui_toggled)
+	_refresh()
+
+func _find_inventory() -> Inventory:
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null:
+		return null
+	for child in player.get_children():
+		if child is Inventory:
+			return child as Inventory
+	return null
+
+func _find_icon(node: Node) -> TextureRect:
+	for child in node.get_children():
+		if child is TextureRect:
+			return child as TextureRect
+		var deeper := _find_icon(child)
+		if deeper != null:
+			return deeper
+	return null
+
+func _find_name(node: Node) -> Label:
+	for child in node.get_children():
+		if child is Label:
+			return child as Label
+		var deeper := _find_name(child)
+		if deeper != null:
+			return deeper
+	return null
+
+func _on_slot_changed(_item: ItemData, _slot: int) -> void:
+	_refresh()
+
+func _on_selection_changed(_slot: int) -> void:
+	_refresh()
+
+func _on_ui_toggled(is_open: bool) -> void:
+	visible = is_open
+
+func _refresh() -> void:
+	var items := inventory.get_slots()
+	for i in mini(_slots.size(), items.size()):
+		var item := items[i]
+		if _icons[i]:
+			_icons[i].texture = item.icon if item != null else null
+		if _names[i]:
+			_names[i].text = item.display_name if item != null else ""
+		if i == inventory.selected_slot:
+			_slots[i].modulate = selected_modulate
+		else:
+			_slots[i].modulate = normal_modulate if item != null else empty_modulate
+</file>
+
+<file path="src/ui/game_menu/state_screen.gd">
+## Put this on the ROOT Control of a pause, game over or win screen (full rect, inside a CanvasLayer).
+## One script for all three: pick which GameState state shows it in "show_on_state".
+## It hides itself otherwise and listens to GameState.state_changed, so nothing else
+## needs to know it exists. Buttons are optional Inspector slots; leave one empty if the
+## screen doesn't have it (a win screen has no Resume, a pause screen has no Restart).
+class_name StateScreen
+extends Control
+
+signal screen_shown
+signal screen_hidden
+
+@export_enum("PAUSED", "GAME_OVER", "WIN") var show_on_state: String = "GAME_OVER"
+## Wait this long before appearing. 0.8 on the game over screen lets the camera shake play first.
+@export var show_delay: float = 0.0
+@export var fade_in_time: float = 0.4
+@export var resume_button: BaseButton
+@export var restart_button: BaseButton
+@export var menu_button: BaseButton
+## Scene the menu button goes to (the main menu).
+@export_file("*.tscn") var menu_scene: String = ""
+
+var _token: int = 0
+
+func _ready() -> void:
+	# Must keep running while the tree is paused, or the buttons would never respond.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
+	if resume_button:
+		resume_button.pressed.connect(GameState.resume_game)
+	if restart_button:
+		restart_button.pressed.connect(GameState.restart)
+	if menu_button:
+		# Same rule as the main menu: no valid scene means the button is disabled.
+		if menu_scene == "" or not ResourceLoader.exists(menu_scene):
+			menu_button.disabled = true
+		else:
+			menu_button.pressed.connect(_on_menu_pressed)
+	GameState.state_changed.connect(_on_game_state_changed)
+	_apply_state(GameState.current)
+
+func _on_game_state_changed(_previous: GameState.State, new_state: GameState.State) -> void:
+	_apply_state(new_state)
+
+func _apply_state(state: GameState.State) -> void:
+	if GameState.State.keys()[state] == show_on_state:
+		_show_screen()
+	else:
+		_hide_screen()
+
+func _show_screen() -> void:
+	# The token cancels a pending delayed show if the state changes again first.
+	_token += 1
+	var my_token := _token
+	if show_delay > 0.0:
+		await get_tree().create_timer(show_delay).timeout
+		if my_token != _token:
+			return
+	visible = true
+	if fade_in_time > 0.0:
+		modulate.a = 0.0
+		create_tween().tween_property(self, "modulate:a", 1.0, fade_in_time)
+	else:
+		modulate.a = 1.0
+	for button in [resume_button, restart_button, menu_button]:
+		if button != null and not button.disabled:
+			button.grab_focus()
+			break
+	screen_shown.emit()
+
+func _hide_screen() -> void:
+	_token += 1
+	if visible:
+		visible = false
+		screen_hidden.emit()
+
+func _on_menu_pressed() -> void:
+	GameState.go_to_menu(menu_scene)
+</file>
+
+<file path="src/ui/main_menu/horror_button.gd">
+extends Button
+	
+@export var normal_scale := Vector2(1.0, 1.0)
+@export var hover_scale := Vector2(1.05, 1.05)
+
+var scale_tween: Tween
+var effect_tween: Tween
+var static_tween: Tween
+
+var normal_style: StyleBoxFlat
+var hover_style: StyleBoxFlat
+
+
+func _ready() -> void:
+	await get_tree().process_frame
+
+	# Keep scaling centered
+	pivot_offset = size / 2.0
+
+	# --------------------------------------------------
+	# NORMAL BUTTON STYLE
+	# --------------------------------------------------
+
+	normal_style = StyleBoxFlat.new()
+	normal_style.bg_color = Color(0, 0, 0, 0) # completely transparent
+	normal_style.border_width_left = 0
+	normal_style.border_width_right = 0
+	normal_style.border_width_top = 0
+	normal_style.border_width_bottom = 0
+
+	# --------------------------------------------------
+	# HOVER BUTTON STYLE
+	# --------------------------------------------------
+
+	hover_style = StyleBoxFlat.new()
+
+	# White scary/glowing box
+	hover_style.bg_color = Color(1, 1, 1, 0.10)
+
+	# Thin white border
+	hover_style.border_width_left = 2
+	hover_style.border_width_right = 2
+	hover_style.border_width_top = 2
+	hover_style.border_width_bottom = 2
+
+	hover_style.border_color = Color(1, 1, 1, 0.75)
+
+	# Slight rounded corners
+	hover_style.corner_radius_top_left = 2
+	hover_style.corner_radius_top_right = 2
+	hover_style.corner_radius_bottom_left = 2
+	hover_style.corner_radius_bottom_right = 2
+
+	# Small internal margins
+	hover_style.content_margin_left = 15
+	hover_style.content_margin_right = 15
+	hover_style.content_margin_top = 5
+	hover_style.content_margin_bottom = 5
+
+	# --------------------------------------------------
+	# APPLY NORMAL STYLE
+	# --------------------------------------------------
+
+	add_theme_stylebox_override("normal", normal_style)
+	add_theme_stylebox_override("hover", hover_style)
+	add_theme_stylebox_override("focus", hover_style)
+	add_theme_stylebox_override("pressed", hover_style)
+
+	# --------------------------------------------------
+	# HORROR FONT GLOW
+	# --------------------------------------------------
+
+	add_theme_color_override(
+		"font_color",
+		Color(1, 1, 1, 1)
+	)
+
+	add_theme_color_override(
+		"font_hover_color",
+		Color(1, 0.15, 0.15, 1)
+	)
+
+	add_theme_color_override(
+		"font_focus_color",
+		Color(1, 0.15, 0.15, 1)
+	)
+
+	add_theme_color_override(
+		"font_pressed_color",
+		Color(1, 1, 1, 1)
+	)
+
+	# Horror/static outline
+	add_theme_color_override(
+		"font_outline_color",
+		Color(1, 1, 1, 0.35)
+	)
+
+	add_theme_constant_override(
+		"outline_size",
+		3
+	)
+
+	# Small shadow/glow
+	add_theme_color_override(
+		"font_shadow_color",
+		Color(1, 1, 1, 0.25)
+	)
+
+	add_theme_constant_override(
+		"shadow_offset_x",
+		0
+	)
+
+	add_theme_constant_override(
+		"shadow_offset_y",
+		0
+	)
+
+	# --------------------------------------------------
+	# SIGNALS
+	# --------------------------------------------------
+
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+
+	focus_entered.connect(_on_focus_entered)
+	focus_exited.connect(_on_focus_exited)
+
+func _on_mouse_entered() -> void:
+	_start_horror_effect()
+
+
+func _on_mouse_exited() -> void:
+	_stop_horror_effect()
+
+
+func _on_focus_entered() -> void:
+	_start_horror_effect()
+
+
+func _on_focus_exited() -> void:
+	_stop_horror_effect()
+
+
+func _start_horror_effect() -> void:
+
+	# Stop old tweens
+	if scale_tween:
+		scale_tween.kill()
+
+	if effect_tween:
+		effect_tween.kill()
+
+	if static_tween:
+		static_tween.kill()
+
+	# --------------------------------------------------
+	# SCALE
+	# --------------------------------------------------
+
+	scale_tween = create_tween()
+	scale_tween.set_trans(Tween.TRANS_SINE)
+	scale_tween.set_ease(Tween.EASE_OUT)
+
+	scale_tween.tween_property(
+		self,
+		"scale",
+		hover_scale,
+		0.12
+	)
+
+	# --------------------------------------------------
+	# STATIC / FLICKER
+	# --------------------------------------------------
+
+	effect_tween = create_tween()
+	effect_tween.set_loops()
+
+	effect_tween.tween_property(
+		self,
+		"modulate:a",
+		0.82,
+		0.045
+	)
+
+	effect_tween.tween_property(
+		self,
+		"modulate:a",
+		1.0,
+		0.055
+	)
+
+	effect_tween.tween_property(
+		self,
+		"modulate:a",
+		0.90,
+		0.035
+	)
+
+	effect_tween.tween_property(
+		self,
+		"modulate:a",
+		1.0,
+		0.10
+	)
+
+	# --------------------------------------------------
+	# TINY HORROR GLITCH
+	# --------------------------------------------------
+
+	static_tween = create_tween()
+	static_tween.set_loops()
+
+	static_tween.tween_property(
+		self,
+		"rotation",
+		deg_to_rad(0.4),
+		0.04
+	)
+
+	static_tween.tween_property(
+		self,
+		"rotation",
+		deg_to_rad(-0.4),
+		0.04
+	)
+
+	static_tween.tween_property(
+		self,
+		"rotation",
+		0.0,
+		0.06
+	)
+
+
+func _stop_horror_effect() -> void:
+
+	if scale_tween:
+		scale_tween.kill()
+
+	if effect_tween:
+		effect_tween.kill()
+
+	if static_tween:
+		static_tween.kill()
+
+	scale_tween = create_tween()
+
+	scale_tween.set_trans(Tween.TRANS_SINE)
+	scale_tween.set_ease(Tween.EASE_OUT)
+
+	scale_tween.tween_property(
+		self,
+		"scale",
+		normal_scale,
+		0.12
+	)
+
+	modulate.a = 1.0
+	rotation = 0.0
+</file>
+
+<file path="src/ui/gaze_distortion.gd">
+class_name GazeDistortion
+extends CanvasLayer
+
+const SHADER: Shader = preload("res://src/ui/effects/gaze_distortion.gdshader")
+
+
+@export var watchable_group: StringName = &"gaze_watchable"
+## Seconds to fade in when the gaze lands / out when it leaves.
+## Only the fade; the strength is always the same.
+@export var fade_in_time: float = 0.1
+@export var fade_out_time: float = 0.25
+
+var _rect: ColorRect
+var _material: ShaderMaterial
+var _amount: float = 0.0
+
+func _ready() -> void:
+	layer = 40   # under StaticOverlay (50), over normal HUD layers
+	_rect = ColorRect.new()
+	_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_rect.visible = false
+	_material = ShaderMaterial.new()
+	_material.shader = SHADER
+	_rect.material = _material
+	add_child(_rect)
+	_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+func _process(delta: float) -> void:
+	var watched := _is_anything_watched()
+	var target := 1.0 if watched else 0.0
+	var fade_time := fade_in_time if watched else fade_out_time
+	_amount = move_toward(_amount, target, delta / maxf(fade_time, 0.001))
+	_rect.visible = _amount > 0.001
+	_material.set_shader_parameter("amount", _amount)
+
+func _is_anything_watched() -> bool:
+	for node in get_tree().get_nodes_in_group(watchable_group):
+		var target := node as Node3D
+		if target != null and GazeSystem.is_watched(target):
+			return true
+	return false
+</file>
+
+<file path="src/ui/static_overlay.gd">
+class_name StaticOverlay
+extends CanvasLayer
+
+const DEFAULT_SHADER: Shader = preload("res://src/ui/effects/static_vignette.gdshader")
+
+## Optional. If empty it finds the entity in the "gaze_watchable" group.
+@export var entity: AIEntity
+## Static strength (0-1) per state node name. Missing states count as 0.
+@export var state_intensity: Dictionary = {
+	"Patrol": 0.0,
+	"Investigate": 0.12,
+	"Search": 0.2,
+	"Detect": 0.4,
+	"Chase": 0.6,
+}
+## Intensity per second when getting stronger / weaker.
+@export var rise_speed: float = 4.0
+@export var fall_speed: float = 0.5
+## Extra spike the moment Detect / Chase starts, fading at punch_decay per second.
+@export var detect_punch: float = 0.3
+@export var chase_punch: float = 0.4
+@export var punch_decay: float = 2.0
+## Max extra static from the entity's hearing meter (rises as it hears noise).
+@export var noise_tension: float = 0.2
+## Cap while playing, so only a catch reaches total static.
+@export var max_before_catch: float = 0.95
+
+@export var go_to_menu_on_game_over: bool = true
+@export_file("*.tscn") var menu_scene: String = "res://src/ui/main_menu/main_menu.tscn"
+## Seconds to ramp to full static, then to hold it before leaving.
+@export var catch_ramp_time: float = 0.3
+@export var catch_hold_time: float = 1.2
+
+var _rect: ColorRect
+var _material: ShaderMaterial
+var _entity: AIEntity
+var _level: float = 0.0
+var _punch: float = 0.0
+var _shown: float = 0.0
+var _caught: bool = false
+var _caught_time: float = 0.0
+var _caught_from: float = 0.0
+var _leaving: bool = false
+
+func _ready() -> void:
+	# Must keep running while the tree is paused (game over pauses it).
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	layer = 50
+	_rect = ColorRect.new()
+	_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_rect.visible = false
+	_material = ShaderMaterial.new()
+	_material.shader = DEFAULT_SHADER
+	_rect.material = _material
+	add_child(_rect)
+	_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	GameState.state_changed.connect(_on_game_state_changed)
+	if entity != null:
+		_hook_entity(entity)
+
+func _process(delta: float) -> void:
+	if _caught:
+		_process_caught(delta)
+		return
+	if _entity == null:
+		var found := get_tree().get_first_node_in_group("gaze_watchable") as AIEntity
+		if found != null:
+			_hook_entity(found)
+	var target := _compute_target()
+	var speed := rise_speed if target > _level else fall_speed
+	_level = move_toward(_level, target, speed * delta)
+	_punch = move_toward(_punch, 0.0, punch_decay * delta)
+	_apply(minf(_level + _punch, max_before_catch))
+
+func _compute_target() -> float:
+	if _entity == null or not _entity.is_active:
+		return 0.0
+	var state := _entity.state_machine.current_state_name
+	var target: float = state_intensity.get(state, 0.0)
+	if _entity.hearing != null:
+		target = maxf(target, _entity.hearing.get_alert_ratio() * noise_tension)
+	return target
+
+func _process_caught(delta: float) -> void:
+	_caught_time += delta
+	var ramp := clampf(_caught_time / catch_ramp_time, 0.0, 1.0)
+	_apply(lerpf(_caught_from, 1.0, ramp))
+	if _leaving or not go_to_menu_on_game_over:
+		return
+	if _caught_time >= catch_ramp_time + catch_hold_time:
+		_leaving = true
+		if ResourceLoader.exists(menu_scene):
+			GameState.go_to_menu(menu_scene)
+		else:
+			push_error("StaticOverlay: menu scene not found: " + menu_scene)
+
+func _apply(value: float) -> void:
+	_shown = value
+	_rect.visible = value > 0.003
+	_material.set_shader_parameter("intensity", value)
+
+func _hook_entity(e: AIEntity) -> void:
+	_entity = e
+	e.detect_started.connect(_on_detect_started)
+	e.chase_started.connect(_on_chase_started)
+
+func _on_detect_started() -> void:
+	_punch = maxf(_punch, detect_punch)
+
+func _on_chase_started() -> void:
+	_punch = maxf(_punch, chase_punch)
+
+func _on_game_state_changed(_previous: GameState.State, new_state: GameState.State) -> void:
+	if new_state == GameState.State.GAME_OVER:
+		_caught = true
+		_caught_time = 0.0
+		_caught_from = _shown
+	elif new_state == GameState.State.PLAYING:
+		_caught = false
+		_leaving = false
+</file>
+
+<file path="src/world/building_navigation.gd">
+extends NavigationRegion3D
+## Navigation for the Olopsc building.
+## The navmesh is baked from the building's collision shapes.
+## In the editor: select this node and press "Bake NavigationMesh" to store it in
+## olopsc_navmesh.tres. If it was never baked, it is baked once at startup so AI still works.
+
+func _ready() -> void:
+	if navigation_mesh and navigation_mesh.get_polygon_count() == 0:
+		bake_navigation_mesh(false)
+		print("Olopsc navmesh baked at runtime: %d polygons" % navigation_mesh.get_polygon_count())
+</file>
+
+<file path="src/world/exit_trigger.gd">
+## Area3D at the exit. The player walking in wins the game.
+class_name ExitTrigger
+extends Area3D
+
+@export var player_group: String = "player"
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+func _on_body_entered(body: Node3D) -> void:
+	if body.is_in_group(player_group):
+		GameState.win()
+</file>
+
+<file path="src/world/interactable.gd">
+## Base class for anything the player can press E on.
+## Put this (or a subclass) on a Node3D that has a physics body somewhere below it.
+## The Interactor's ray hits the body, then walks up the tree to find this node.
+class_name Interactable
+extends Node3D
+
+signal interacted(interactor: Interactor)
+
+## Shown by the HUD, e.g. "Open". The UI adds the "[E]" part.
+@export var prompt_text: String = "Interact"
+@export var enabled: bool = true
+
+## Empty string means "show no prompt".
+func get_prompt(_interactor: Interactor) -> String:
+	return prompt_text if enabled else ""
+
+func interact(interactor: Interactor) -> void:
+	if not enabled:
+		return
+	_on_interact(interactor)
+	interacted.emit(interactor)
+
+## Override in subclasses.
+func _on_interact(_interactor: Interactor) -> void:
+	pass
+</file>
+
+<file path="src/world/light_flicker.gd">
+## Put this on any OmniLight3D or SpotLight3D (not the player's flashlight).
+## At random intervals the light flickers in a short burst, then returns to its normal energy.
+## It only emits flicker_started; SoundManager hooks that signal on its own to play
+## "light_flicker", so this script never references audio.
+## It changes light_energy only, so ScareTrigger turning the light off with "visible" still works.
+class_name LightFlicker
+extends Light3D
+
+signal flicker_started(world_position: Vector3)
+
+## Seconds between bursts (random between the two).
+@export var min_gap: float = 4.0
+@export var max_gap: float = 12.0
+## How many on/off pulses per burst (random between the two).
+@export var min_pulses: int = 2
+@export var max_pulses: int = 5
+## Length of each half pulse, in seconds (random between the two).
+@export var min_step: float = 0.03
+@export var max_step: float = 0.12
+## Energy while "off" as a fraction of normal. 0 is fully dark, 0.2 is a dim buzz.
+@export_range(0.0, 1.0) var dim_to: float = 0.05
+
+var _base_energy: float = 1.0
+var _gap_left: float = 0.0
+var _toggles_left: int = 0
+var _step_left: float = 0.0
+var _dimmed: bool = false
+
+func _ready() -> void:
+	_base_energy = light_energy
+	_gap_left = randf_range(min_gap, max_gap)
+
+func _process(delta: float) -> void:
+	if _toggles_left > 0 or _step_left > 0.0:
+		_step_left -= delta
+		if _step_left <= 0.0:
+			_advance_burst()
+	else:
+		_gap_left -= delta
+		if _gap_left <= 0.0:
+			flicker_now()
+
+## Starts a burst immediately. Anything can call this, e.g. a scripted scare.
+func flicker_now() -> void:
+	if _toggles_left > 0:
+		return
+	_toggles_left = randi_range(min_pulses, max_pulses) * 2
+	_dimmed = false
+	flicker_started.emit(global_position)
+	_advance_burst()
+
+func _advance_burst() -> void:
+	if _toggles_left <= 0:
+		# Burst over: back to normal and wait for the next one.
+		light_energy = _base_energy
+		_dimmed = false
+		_step_left = 0.0
+		_gap_left = randf_range(min_gap, max_gap)
+		return
+	_dimmed = not _dimmed
+	light_energy = _base_energy * (dim_to if _dimmed else 1.0)
+	_toggles_left -= 1
+	_step_left = randf_range(min_step, max_step)
+</file>
+
+<file path="src/world/patrol_route.gd">
+# Goes in map, attach to Node3D
+# Has Marker3D children, Patrol goes in order of
+# children then loops back
+class_name PatrolRoute
+extends Node3D
+
+func get_points() -> Array[Vector3]:
+	var points: Array[Vector3] = []
+	for child in get_children():
+		if child is Marker3D:
+			points.append(child.global_position)
+	return points
+</file>
+
+<file path="src/world/player_trigger.gd">
+class_name PlayerTrigger
+extends Area3D
+
+signal triggered
+
+@export var player_group: String = "player"
+@export var one_shot: bool = true
+
+var _fired: bool = false
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+func _on_body_entered(body: Node3D) -> void:
+	if one_shot and _fired:
+		return
+	if not body.is_in_group(player_group):
+		return
+	_fired = true
+	triggered.emit()
+</file>
+
+<file path="src/world/room_zone.gd">
+class_name RoomZone
+extends Area3D
+
+@export var room_id: StringName
+@export_range(1, 4) var floor_id: int = 1
+# How much the entity prefers this room when patrolling (0 = never, 3 = often).
+@export var patrol_weight: float = 1.0
+@export var look_around_time: float = 3.0
+
+func _ready() -> void:
+	add_to_group("room_zones")
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
+
+func get_patrol_points() -> Array[Vector3]:
+	var points: Array[Vector3] = []
+	for child in get_children():
+		if child is Marker3D:
+			points.append(child.global_position)
+	return points
+
+func _on_body_entered(body: Node3D) -> void:
+	var tracker := LocationTracker.find_on(body)
+	if tracker:
+		tracker.zone_entered(self)
+
+func _on_body_exited(body: Node3D) -> void:
+	var tracker := LocationTracker.find_on(body)
+	if tracker:
+		tracker.zone_exited(self)
+</file>
+
+<file path="src/world/room.gd">
+extends Node3D
+
+func _ready() -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	var tracker := LocationTracker.find_on(player)
+	tracker.location_changed.connect(_on_player_location_changed)
+
+func _on_player_location_changed(room_id: StringName, floor_id: int) -> void:
+	pass
+</file>
+
+<file path="src/autoload/game_state.gd">
+extends Node
+## Autoload as "GameState". Owns the high-level state of the run.
+## Other systems listen to state_changed instead of polling.
+
+enum State { MENU, PLAYING, PAUSED, GAME_OVER, WIN }
+
+signal state_changed(previous: State, new_state: State)
+
+## Defaults to PLAYING so any scene can be run directly with F6 for testing.
+## The main menu scene should call go_to_menu() / set MENU when it loads.
+var current: State = State.PLAYING
+
+func _ready() -> void:
+	# Must keep running while the tree is paused, or it could never unpause it.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		if current == State.PLAYING:
+			pause_game()
+		elif current == State.PAUSED:
+			resume_game()
+
+func is_playing() -> bool:
+	return current == State.PLAYING
+
+## Pass a scene path to load it first (e.g. from the main menu's Start button).
+func start_game(scene_path: String = "") -> void:
+	_set_state(State.PLAYING)
+	if scene_path != "":
+		get_tree().change_scene_to_file(scene_path)
+
+func pause_game() -> void:
+	if current == State.PLAYING:
+		_set_state(State.PAUSED)
+
+func resume_game() -> void:
+	if current == State.PAUSED:
+		_set_state(State.PLAYING)
+
+func game_over() -> void:
+	if current == State.PLAYING:
+		_set_state(State.GAME_OVER)
+
+func win() -> void:
+	if current == State.PLAYING:
+		_set_state(State.WIN)
+
+func restart() -> void:
+	_set_state(State.PLAYING)
+	get_tree().reload_current_scene()
+
+func go_to_menu(scene_path: String) -> void:
+	_set_state(State.MENU)
+	get_tree().change_scene_to_file(scene_path)
+
+func _set_state(new_state: State) -> void:
+	if new_state == current:
+		return
+	var previous := current
+	current = new_state
+	get_tree().paused = new_state in [State.PAUSED, State.GAME_OVER, State.WIN]
+	Input.mouse_mode = (
+		Input.MOUSE_MODE_CAPTURED if new_state == State.PLAYING
+		else Input.MOUSE_MODE_VISIBLE
+	)
+	state_changed.emit(previous, new_state)
+
+func enter_menu() -> void:
+	_set_state(State.MENU)
+</file>
+
+<file path="src/debug/debug_hud.gd">
+## TEMPORARY. Shows what the Interactor and Inventory report, so you can test
+## without Randy's UI. Delete this once his HUD is in.
+## Add a CanvasLayer node to the test world and attach this script.
+extends CanvasLayer
+
+var _prompt: Label
+var _feedback: Label
+var _items: Label
+var _inventory: Inventory
+
+func _ready() -> void:
+	var box := VBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	box.offset_top = -150.0
+	box.offset_bottom = -20.0
+	add_child(box)
+	_feedback = _make_label(box)
+	_prompt = _make_label(box)
+	_items = _make_label(box)
+
+	# Wait one frame so the Player has joined the "player" group.
+	await get_tree().process_frame
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null:
+		push_warning("DebugHUD: no node in group 'player'.")
+		return
+	var interactor := player.get_node_or_null("Interactor") as Interactor
+	_inventory = player.get_node_or_null("Inventory") as Inventory
+	if interactor == null or _inventory == null:
+		push_warning("DebugHUD: Player needs 'Interactor' and 'Inventory' child nodes.")
+		return
+	interactor.prompt_changed.connect(_on_prompt_changed)
+	interactor.feedback.connect(_on_feedback)
+	_inventory.item_added.connect(func(_item, _slot): _refresh_items())
+	_inventory.item_removed.connect(func(_item, _slot): _refresh_items())
+	_inventory.selection_changed.connect(func(_slot): _refresh_items())
+	_refresh_items()
+
+func _make_label(parent: Control) -> Label:
+	var label := Label.new()
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	parent.add_child(label)
+	return label
+
+func _on_prompt_changed(text: String) -> void:
+	_prompt.text = ("[E] " + text) if text != "" else ""
+
+func _on_feedback(text: String) -> void:
+	_feedback.text = text
+	get_tree().create_timer(2.0).timeout.connect(
+		func(): if _feedback.text == text: _feedback.text = ""
+	)
+
+func _refresh_items() -> void:
+	var parts: Array[String] = []
+	var slots := _inventory.get_slots()
+	for i in slots.size():
+		if slots[i] != null:
+			var marker := ">" if i == _inventory.selected_slot else ""
+			# The 10th slot is the 0 key.
+			parts.append("%s[%d] %s" % [marker, (i + 1) % 10, slots[i].display_name])
+	_items.text = "Items: " + ("empty" if parts.is_empty() else "  ".join(parts))
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F5:
+			var system := get_tree().get_first_node_in_group("save_system") as SaveSystem
+			if system:
+				print("Saved slot 1: ", system.save_to_slot(0))
+		elif event.keycode == KEY_F9:
+			var path := SaveStore.begin_load(0)
+			if path != "":
+				GameState.start_game(path)
+</file>
+
+<file path="src/entity/states/investigate_state.gd">
+class_name InvestigateState
+extends AIState
+
+@export var move_speed: float = 3.5
+@export var turn_speed: float = 5.0
+@export var max_travel_time: float = 40.0
+# Max time to travel as a failsafe
+var _timer: float = 0.0
+
+func enter() -> void:
+	_timer = 0.0
+
+func physics_update(delta: float) -> void:
+	_timer += delta
+	entity.move_towards(entity.noise_position, move_speed)
+	entity.face_movement(turn_speed, delta)
+	var on_target_floor := entity.location.floor_id == entity.noise_floor_id
+	if on_target_floor or entity.nav_agent.is_navigation_finished() or _timer >= max_travel_time:
+		transition_requested.emit("Patrol")
+
+func on_perception_updated(can_see_player: bool, _delta: float) -> void:
+	if can_see_player:
+		transition_requested.emit("Detect")
+
+func on_noise_alert(_room_id: StringName, _floor_id: int, _world_position: Vector3) -> void:
+	entity.respond_to_noise()
+</file>
+
+<file path="src/entity/ai_state_machine.gd">
+class_name AIStateMachine
+extends Node
+
+signal state_changed(previous_state: String, new_state: String)
+
+# Node name of the state to start in
+@export var initial_state_name: String = "Patrol"
+
+var _states: Dictionary = {} # String -> AIState
+var current_state: AIState
+var current_state_name: String = ""
+
+func _ready() -> void:
+	var owner_entity := get_parent() as AIEntity
+	for child in get_children():
+		if child is AIState:
+			_states[child.name] = child
+			child.entity = owner_entity
+			child.transition_requested.connect(_change_state)
+	_change_state(initial_state_name)
+
+func _physics_process(delta: float) -> void:
+	if current_state:
+		current_state.physics_update(delta)
+
+func notify_gaze(is_watched: bool, watched_duration: float, delta: float) -> void:
+	if current_state:
+		current_state.on_gaze_changed(is_watched, watched_duration, delta)
+
+func notify_perception(can_see_player: bool, delta: float) -> void:
+	if current_state:
+		current_state.on_perception_updated(can_see_player, delta)
+
+func force_transition(state_name: String) -> void:
+	_change_state(state_name)
+
+func _change_state(state_name: String) -> void:
+	if not _states.has(state_name):
+		push_warning("AIStateMachine: no state named '%s'" % state_name)
+		return
+	if current_state and current_state.name == state_name:
+		return
+	var previous_name := current_state_name
+	if current_state:
+		current_state.exit()
+	current_state = _states[state_name]
+	current_state_name = state_name
+	current_state.enter()
+	state_changed.emit(previous_name, state_name)
+
+func notify_noise(room_id: StringName, floor_id: int, world_position: Vector3) -> void:
+	if current_state:
+		current_state.on_noise_alert(room_id, floor_id, world_position)
+</file>
+
+<file path="src/entity/ai_state.gd">
+class_name AIState
+extends Node
+
+signal transition_requested(state_name: String)
+
+var entity: AIEntity
+
+func enter() -> void:
+	pass
+
+func exit() -> void:
+	pass
+
+func physics_update(_delta: float) -> void:
+	pass
+
+func on_gaze_changed(_is_watched: bool, _watched_duration: float, _delta: float) -> void:
+	pass
+
+func on_perception_updated(_can_see_player: bool, _delta: float) -> void:
+	pass
+
+func on_noise_alert(_room_id: StringName, _floor_id: int, _world_position: Vector3) -> void:
+	pass
+</file>
+
+<file path="src/entity/entity_hearing.gd">
+class_name EntityHearing
+extends Node
+
+signal noise_alert(room_id: StringName, floor_id: int, world_position: Vector3)
+
+@export var alert_threshold: float = 1.0
+@export var decay_per_second: float = 0.3
+# Multiplier for noise on the same floor but in a different room.
+@export_range(0.0, 1.0) var other_room_falloff: float = 0.7
+# Multiplier applied once per floor of distance.
+@export_range(0.0, 1.0) var per_floor_falloff: float = 0.5
+
+var meter: float = 0.0
+
+var _location: LocationTracker
+var _best_heard: float = 0.0
+var _noise_room_id: StringName = &""
+var _noise_floor_id: int = 0
+var _noise_position: Vector3
+
+func _ready() -> void:
+	_location = LocationTracker.find_on(get_parent())
+	if _location == null:
+		push_warning("EntityHearing: parent needs a LocationTracker child.")
+	NoiseManager.noise_emitted.connect(_on_noise_emitted)
+
+func _physics_process(delta: float) -> void:
+	meter = maxf(meter - decay_per_second * delta, 0.0)
+	_best_heard = maxf(_best_heard - decay_per_second * delta, 0.0)
+
+## 0..1, for a heartbeat or tension effect if Julianna wants one.
+func get_alert_ratio() -> float:
+	return clampf(meter / alert_threshold, 0.0, 1.0)
+
+func _on_noise_emitted(
+	_noise_type: StringName,
+	loudness: float,
+	room_id: StringName,
+	floor_id: int,
+	world_position: Vector3
+) -> void:
+	if not can_process():
+		return
+	if _location == null:
+		return
+	var heard := _heard_loudness(loudness, room_id, floor_id)
+	if heard <= 0.0:
+		return
+	meter += heard
+	# Remember where the loudest recent noise came from.
+	if heard >= _best_heard:
+		_best_heard = heard
+		_noise_room_id = room_id
+		_noise_floor_id = floor_id
+		_noise_position = world_position
+	if meter >= alert_threshold:
+		meter = 0.0
+		_best_heard = 0.0
+		noise_alert.emit(_noise_room_id, _noise_floor_id, _noise_position)
+
+func _heard_loudness(loudness: float, room_id: StringName, floor_id: int) -> float:
+	var floors_apart := absi(floor_id - _location.floor_id)
+	if floors_apart > 0:
+		return loudness * pow(per_floor_falloff, floors_apart)
+	if room_id != _location.room_id:
+		return loudness * other_room_falloff
+	return loudness
+</file>
+
+<file path="src/item/item_data.gd">
+## One kind of item. Create .tres files from this (FileSystem > New Resource > ItemData).
+class_name ItemData
+extends Resource
+
+## Used to match items to doors, e.g. &"key_classroom_201".
+@export var id: StringName
+@export var display_name: String = ""
+@export var use_action: StringName = &""
+@export_multiline var description: String = ""
+@export var icon: Texture2D
+</file>
+
+<file path="src/ui/main_menu/main_menu.gd">
+extends Control
+
+@export var start_button: Button
+@export var load_button: Button
+@export var settings_button: Button
+@export var quit_button: Button
+
+@export_file("*.tscn") var start_scene: String = ""
+@export_file("*.tscn") var load_scene: String = ""
+@export_file("*.tscn") var settings_scene: String = ""
+
+func _ready() -> void:
+	GameState.enter_menu()
+
+	_bind(start_button, _on_start_pressed)
+	_bind(load_button, _on_load_pressed)
+	_bind(settings_button, _on_settings_pressed)
+	_bind(quit_button, _on_quit_pressed)
+
+	_disable_if_missing(start_button, start_scene)
+	_disable_if_missing(load_button, load_scene)
+	_disable_if_missing(settings_button, settings_scene)
+
+func _bind(button: Button, handler: Callable) -> void:
+	if button == null:
+		push_warning("MainMenu: a button slot is empty in the Inspector.")
+		return
+	button.pressed.connect(handler)
+
+func _disable_if_missing(button: Button, scene_path: String) -> void:
+	if button != null:
+		button.disabled = not ResourceLoader.exists(scene_path)
+
+func _open(scene_path: String) -> bool:
+	if not ResourceLoader.exists(scene_path):
+		push_warning("MainMenu: scene not found: '%s'" % scene_path)
+		return false
+	get_tree().change_scene_to_file(scene_path)
+	return true
+
+func _on_start_pressed() -> void:
+	# Only flip GameState to PLAYING if the game scene is really going to load.
+	if _open(start_scene):
+		GameState.start_game()
+
+func _on_load_pressed() -> void:
+	_open(load_scene)
+
+func _on_settings_pressed() -> void:
+	_open(settings_scene)
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()
+</file>
+
+<file path="src/ui/settings/settings.gd">
+extends Control
+
+@export_file("*.tscn") var back_scene: String = "res://src/ui/main_menu/main_menu.tscn"
+
+@onready var master_slider: HSlider = $SettingsPanel/SettingsRows/MasterRow/MasterSlider
+@onready var music_slider: HSlider = $SettingsPanel/SettingsRows/MusicRow/MusicSlider
+@onready var sfx_slider: HSlider = $SettingsPanel/SettingsRows/SfxRow/SfxSlider
+
+@onready var master_value: Label = $SettingsPanel/SettingsRows/MasterRow/MasterValue
+@onready var music_value: Label = $SettingsPanel/SettingsRows/MusicRow/MusicValue
+@onready var sfx_value: Label = $SettingsPanel/SettingsRows/SfxRow/SfxValue
+
+@onready var back_button: Button = find_child("BackButton", true, false)
+
+
+func _ready() -> void:
+	# Show the volumes the buses actually have (they persist while the scene changes).
+	# Set before connecting, so loading the screen doesn't re-apply the same values.
+	master_slider.value = SoundManager.get_bus_percent(&"Master")
+	music_slider.value = SoundManager.get_bus_percent(&"Music")
+	sfx_slider.value = SoundManager.get_bus_percent(&"SFX")
+
+	master_slider.value_changed.connect(_on_master_changed)
+	music_slider.value_changed.connect(_on_music_changed)
+	sfx_slider.value_changed.connect(_on_sfx_changed)
+
+	back_button.pressed.connect(_on_back_pressed)
+
+	_update_volume_labels()
+
+
+func _on_master_changed(value: float) -> void:
+	master_value.text = str(int(value)) + "%"
+	SoundManager.set_bus_percent(&"Master", value)
+
+
+func _on_music_changed(value: float) -> void:
+	music_value.text = str(int(value)) + "%"
+	SoundManager.set_bus_percent(&"Music", value)
+
+
+func _on_sfx_changed(value: float) -> void:
+	sfx_value.text = str(int(value)) + "%"
+	SoundManager.set_bus_percent(&"SFX", value)
+
+
+func _update_volume_labels() -> void:
+	master_value.text = str(int(master_slider.value)) + "%"
+	music_value.text = str(int(music_slider.value)) + "%"
+	sfx_value.text = str(int(sfx_slider.value)) + "%"
+
+
+func _on_back_pressed() -> void:
+	if not ResourceLoader.exists(back_scene):
+		push_error("Settings: Main Menu scene not found: " + back_scene)
+		return
+
+	get_tree().change_scene_to_file(back_scene)
+</file>
+
+<file path="src/world/hiding_spot.gd">
+## Area3D placed at a hiding spot (locker, under a desk, closet).
+class_name HidingSpot
+extends Area3D
+ 
+## Optional. If empty, it uses the Concealment node found on the player.
+@export var concealment: Concealment
+@export var player_group: String = "player"
+ 
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+	body_exited.connect(_on_body_exited)
+ 
+func _on_body_entered(body: Node3D) -> void:
+	if not body.is_in_group(player_group):
+		return
+	var target := _get_concealment(body)
+	if target:
+		target.enter_hiding_spot(global_position)
+ 
+func _on_body_exited(body: Node3D) -> void:
+	if not body.is_in_group(player_group):
+		return
+	var target := _get_concealment(body)
+	if target:
+		target.exit_hiding_spot()
+ 
+func _get_concealment(body: Node) -> Concealment:
+	if concealment:
+		return concealment
+	for child in body.get_children():
+		if child is Concealment:
+			return child as Concealment
+	return null
+</file>
+
+<file path="src/world/locker.gd">
+## A locker or closet. Press E to climb in, E again to climb out.
+## While inside the player is hidden (the entity can't see them, same as a
+## HidingSpot), can't walk, and can only look through a limited angle.
+## Climbing in and out is a short camera glide; controls are frozen during it.
+class_name Locker
+extends Interactable
+
+signal entered
+signal exited
+
+@export var hide_point: Marker3D
+@export var exit_point: Marker3D
+## How far left/right the player can look while inside.
+@export var look_half_angle_deg: float = 50.0
+## How far up/down the player can look while inside.
+@export var look_half_pitch_deg: float = 25.0
+## Seconds for the glide in (the camera also turns to face out of the opening).
+@export var enter_time: float = 0.45
+## Seconds for the glide back out.
+@export var exit_time: float = 0.35
+
+var occupied: bool = false
+
+var _player: Player
+var _interactor: Interactor
+var _busy: bool = false   # true while a glide is playing
+var _tween: Tween
+
+func get_prompt(_interactor_arg: Interactor) -> String:
+	if not enabled or _busy:
+		return ""
+	return "Leave" if occupied else "Hide"
+
+func _on_interact(interactor: Interactor) -> void:
+	if _busy:
+		return
+	if occupied:
+		_leave()
+	else:
+		_enter(interactor)
+
+func _enter(interactor: Interactor) -> void:
+	var player := interactor.get_parent() as Player
+	if player == null or hide_point == null or exit_point == null:
+		push_warning("Locker: needs hide_point, exit_point, and an Interactor under the Player.")
+		return
+	_player = player
+	_interactor = interactor
+	occupied = true
+	_busy = true
+
+	# Must happen before the player is moved: it checks whether the entity can
+	# see the player where they are standing right now.
+	var concealment := _player.hide_component as Concealment
+	concealment.enter_hiding_spot(hide_point.global_position)
+	if not concealment.is_hidden:
+		_interactor.show_feedback("It saw you go in.")
+
+	# Face the player out of the opening (from the hide point toward the exit point).
+	var outward := exit_point.global_position - hide_point.global_position
+	var yaw := atan2(-outward.x, -outward.z)
+
+	var start := _player.global_position
+	var control := exit_point.global_position + Vector3(0.0, _player.feet_offset, 0.0)
+	var end := hide_point.global_position + Vector3(0.0, _player.feet_offset, 0.0)
+
+	_player.freeze_controls()
+	_interactor.force_focus(self)
+
+	_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.tween_method(
+		_glide_in.bind(start, control, end, _player.rotation.y, yaw, _player.head.rotation.x),
+		0.0, 1.0, enter_time
+	)
+	_tween.tween_callback(_finish_enter.bind(yaw))
+
+## t runs 0 -> 1. The position follows a curve that bends through the opening
+## (control = exit point), so the player never cuts through a side wall.
+func _glide_in(t: float, start: Vector3, control: Vector3, end: Vector3,
+		start_yaw: float, end_yaw: float, start_pitch: float) -> void:
+	_player.global_position = start.lerp(control, t).lerp(control.lerp(end, t), t)
+	_player.rotation.y = lerp_angle(start_yaw, end_yaw, t)
+	_player.head.rotation.x = lerpf(start_pitch, 0.0, t)
+
+func _finish_enter(yaw: float) -> void:
+	# Hands over to the limited look-around (also resets the camera bob offset).
+	_player.lock_controls(yaw, look_half_angle_deg, look_half_pitch_deg)
+	_busy = false
+	entered.emit()
+
+func _leave() -> void:
+	occupied = false
+	_busy = true
+	(_player.hide_component as Concealment).exit_hiding_spot()
+	_interactor.release_focus()
+	_player.freeze_controls()
+
+	var end := exit_point.global_position + Vector3(0.0, _player.feet_offset, 0.0)
+	_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tween.tween_property(_player, "global_position", end, exit_time)
+	_tween.tween_callback(_finish_leave)
+
+func _finish_leave() -> void:
+	_player.unlock_controls()
+	_busy = false
+	exited.emit()
+</file>
+
+<file path="src/world/pickup_item.gd">
+class_name PickupItem
+extends Interactable
+
+@export var item: ItemData
+
+func _ready() -> void:
+	add_to_group("saveable")
+
+func capture_state() -> Dictionary:
+	return {"present": true}
+
+func on_missing_from_save() -> void:
+	queue_free()
+
+func get_prompt(_interactor: Interactor) -> String:
+	if item == null or not enabled:
+		return ""
+	return "Pick up %s" % item.display_name
+
+func _on_interact(interactor: Interactor) -> void:
+	if item == null:
+		return
+	if interactor.inventory.add_item(item):
+		queue_free()
+	else:
+		interactor.show_feedback("Inventory full.")
+</file>
+
+<file path="src/world/scare_trigger.gd">
+class_name ScareTrigger
+extends Area3D
+
+@export var entity: AIEntity
+@export var reveal_position: Vector3
+@export var lights: Array[Light3D] = []
+@export var chase_gaze_threshold: float = 1.0
+@export var player_group: String = "player"
+
+var _triggered: bool = false
+var _revealing: bool = false
+var _reveal_timer: float = 0.0
+
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+
+func _on_body_entered(body: Node3D) -> void:
+	if _triggered or not body.is_in_group(player_group):
+		return
+
+	_triggered = true
+	_start_scare()
+
+
+func _start_scare() -> void:
+	for light in lights:
+		light.visible = false
+
+	SoundManager.play_at(&"light_flicker", global_position)
+
+	entity.global_position = reveal_position
+	_revealing = true
+	_reveal_timer = 0.0
+
+
+func _physics_process(delta: float) -> void:
+	if not _revealing:
+		return
+
+	if GazeSystem.is_watched(entity):
+		_reveal_timer += delta
+
+		if _reveal_timer >= chase_gaze_threshold:
+			_end_scare("Chase")
+	else:
+		_end_scare("Patrol")
+
+
+func _end_scare(next_state: String) -> void:
+	_revealing = false
+	entity.state_machine.force_transition(next_state)
+
+	for light in lights:
+		light.visible = true
+</file>
+
+<file path="src/autoload/sound_manager.gd">
+## SOUND IDS (one SoundEntry each; a missing one just stays silent and warns once in Output):
+##   Loops:   ambience (bus Ambience), chase_music (bus Music)
+##   Player:  footstep_walk, footstep_sprint, flashlight_click, item_pickup
+##   Doors:   door_open, door_close, door_locked
+##   Entity:  entity_patrol, entity_detect, entity_chase, entity_search, entity_investigate
+##            (3D, follows the entity, repeats while it stays in that state)
+##   Stings:  chase_sting, game_over, win
+##   Lights:  light_flicker (3D, plays when a LightFlicker starts a burst)
+extends Node
+
+## Fill these in the Inspector. One SoundEntry per id above.
+@export var entries: Array[SoundEntry] = []
+@export var ambience_id: StringName = &"ambience"
+@export var chase_music_id: StringName = &"chase_music"
+@export var chase_sting_id: StringName = &"chase_sting"
+@export var fade_time: float = 1.0
+@export var entity_voice_height: float = 2.0
+
+var _by_id: Dictionary = {}        # StringName -> SoundEntry
+var _last_index: Dictionary = {}   # StringName -> int, last stream used, to avoid repeats
+var _warned: Dictionary = {}       # StringName -> true, ids already warned about
+var _loops: Dictionary = {}        # StringName -> AudioStreamPlayer
+var _voice: AudioStreamPlayer3D
+var _voice_id: StringName = &""
+
+func _ready() -> void:
+	# Must keep running while the tree is paused so the game over sound can play.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	for bus_name in [&"Music", &"SFX", &"Ambience"]:
+		_ensure_bus(bus_name)
+	for entry in entries:
+		if entry != null and entry.id != &"":
+			_by_id[entry.id] = entry
+	NoiseManager.noise_emitted.connect(_on_noise_emitted)
+	GameState.state_changed.connect(_on_game_state_changed)
+	get_tree().node_added.connect(_on_node_added)
+
+# One-shot that isn't tied to a place (stings, UI, game over).
+func play(id: StringName) -> void:
+	var entry := _get_entry(id)
+	if entry == null:
+		return
+	var player := AudioStreamPlayer.new()
+	player.stream = _pick_stream(entry)
+	player.volume_db = entry.volume_db
+	player.pitch_scale = _random_pitch(entry)
+	player.bus = StringName(entry.bus)
+	add_child(player)
+	player.finished.connect(player.queue_free)
+	player.play()
+
+# One-shot that comes from a spot in the world (doors, footsteps). Quieter with distance.
+func play_at(id: StringName, world_position: Vector3) -> void:
+	var entry := _get_entry(id)
+	if entry == null:
+		return
+	var player := AudioStreamPlayer3D.new()
+	player.stream = _pick_stream(entry)
+	player.volume_db = entry.volume_db
+	player.pitch_scale = _random_pitch(entry)
+	player.bus = StringName(entry.bus)
+	player.max_distance = entry.max_distance
+	add_child(player)
+	player.global_position = world_position
+	player.finished.connect(player.queue_free)
+	player.play()
+
+# Starts a looping sound with a fade in. Does nothing if that loop is already running.
+func start_loop(id: StringName) -> void:
+	if _loops.has(id):
+		return
+	var entry := _get_entry(id)
+	if entry == null:
+		return
+	var player := AudioStreamPlayer.new()
+	player.stream = _pick_stream(entry)
+	player.bus = StringName(entry.bus)
+	player.volume_db = -80.0
+	add_child(player)
+	# Restarts the sound when it ends, so it loops even if the file's Loop import option is off.
+	player.finished.connect(_on_loop_finished.bind(id, player))
+	player.play()
+	_loops[id] = player
+	create_tween().tween_property(player, "volume_db", entry.volume_db, fade_time)
+
+func stop_loop(id: StringName, fade: float = -1.0) -> void:
+	if not _loops.has(id):
+		return
+	var player: AudioStreamPlayer = _loops[id]
+	_loops.erase(id)
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", -80.0, fade if fade >= 0.0 else fade_time)
+	tween.tween_callback(player.queue_free)
+
+func stop_all_loops(fade: float = -1.0) -> void:
+	for id in _loops.keys():
+		stop_loop(id, fade)
+
+func set_bus_percent(bus_name: StringName, percent: float) -> void:
+	var index := AudioServer.get_bus_index(bus_name)
+	if index == -1:
+		return
+	var linear := clampf(percent / 100.0, 0.0, 1.0)
+	AudioServer.set_bus_mute(index, linear <= 0.0)
+	if linear > 0.0:
+		AudioServer.set_bus_volume_db(index, linear_to_db(linear))
+
+func get_bus_percent(bus_name: StringName) -> float:
+	var index := AudioServer.get_bus_index(bus_name)
+	if index == -1:
+		return 100.0
+	if AudioServer.is_bus_mute(index):
+		return 0.0
+	return db_to_linear(AudioServer.get_bus_volume_db(index)) * 100.0
+
+func _on_noise_emitted(
+	noise_type: StringName,
+	_loudness: float,
+	_room_id: StringName,
+	_floor_id: int,
+	world_position: Vector3
+) -> void:
+	play_at(noise_type, world_position)
+
+func _on_game_state_changed(_previous: GameState.State, new_state: GameState.State) -> void:
+	match new_state:
+		GameState.State.PAUSED:
+			_set_loops_paused(true)
+		GameState.State.PLAYING:
+			_set_loops_paused(false)
+			stop_loop(&"menu_music")
+		GameState.State.GAME_OVER:
+			stop_all_loops(0.3)
+			play(&"game_over")
+		GameState.State.WIN:
+			stop_all_loops(2.0)
+			play(&"win")
+		GameState.State.MENU:
+			stop_all_loops(0.5)
+			start_loop(&"menu_music")
+
+func _on_node_added(node: Node) -> void:
+	if node is Player:
+		start_loop(ambience_id)
+	elif node is AIEntity:
+		_hook_entity(node as AIEntity)
+	elif node is Flashlight:
+		(node as Flashlight).toggled.connect(_on_flashlight_toggled)
+	elif node is Inventory:
+		(node as Inventory).item_added.connect(_on_item_added)
+	elif node.has_signal(&"flicker_started"):
+		node.connect(&"flicker_started", _on_light_flicker_started)
+
+func _on_flashlight_toggled(_is_on: bool) -> void:
+	play(&"flashlight_click")
+
+func _on_light_flicker_started(world_position: Vector3) -> void:
+	play_at(&"light_flicker", world_position)
+
+func _on_item_added(_item: ItemData, _slot: int) -> void:
+	play(&"item_pickup")
+
+func _on_loop_finished(id: StringName, player: AudioStreamPlayer) -> void:
+	# Ignore players that were stopped or replaced.
+	if _loops.get(id) != player:
+		return
+	var entry := _get_entry(id)
+	if entry == null:
+		return
+	player.stream = _pick_stream(entry)
+	player.play()
+
+func _hook_entity(entity: AIEntity) -> void:
+	await entity.ready
+	if entity.state_machine == null:
+		return
+	_voice = AudioStreamPlayer3D.new()
+	_voice.position = Vector3(0.0, entity_voice_height, 0.0)
+	_voice.finished.connect(_play_voice)
+	entity.add_child(_voice)
+	entity.state_machine.state_changed.connect(_on_entity_state_changed)
+	_on_entity_state_changed("", entity.state_machine.current_state_name)
+
+func _on_entity_state_changed(_previous: String, new_state: String) -> void:
+	if not is_instance_valid(_voice):
+		return
+	if new_state == "Chase":
+		play(chase_sting_id)
+		start_loop(chase_music_id)
+	else:
+		stop_loop(chase_music_id)
+	_voice.stop()
+	_voice_id = StringName("entity_" + new_state.to_lower())
+	_play_voice()
+
+## Plays the current state's voice. Called again when the clip ends, so it repeats while the state lasts.
+func _play_voice() -> void:
+	if not is_instance_valid(_voice):
+		return
+	var entry := _get_entry(_voice_id, false)
+	if entry == null:
+		_voice.stop()
+		return
+	_voice.stream = _pick_stream(entry)
+	_voice.volume_db = entry.volume_db
+	_voice.pitch_scale = _random_pitch(entry)
+	_voice.bus = StringName(entry.bus)
+	_voice.max_distance = entry.max_distance
+	_voice.play()
+
+func _get_entry(id: StringName, warn: bool = true) -> SoundEntry:
+	var entry: SoundEntry = _by_id.get(id)
+	if entry == null or entry.streams.is_empty():
+		if warn and not _warned.has(id):
+			_warned[id] = true
+			push_warning("SoundManager: no sound assigned for '%s'." % id)
+		return null
+	return entry
+
+func _pick_stream(entry: SoundEntry) -> AudioStream:
+	var count := entry.streams.size()
+	var index := randi() % count
+	if count > 1 and index == _last_index.get(entry.id, -1):
+		index = (index + 1 + randi() % (count - 1)) % count
+	_last_index[entry.id] = index
+	return entry.streams[index]
+
+func _random_pitch(entry: SoundEntry) -> float:
+	return 1.0 + randf_range(-entry.pitch_variation, entry.pitch_variation)
+
+func _set_loops_paused(value: bool) -> void:
+	for player in _loops.values():
+		(player as AudioStreamPlayer).stream_paused = value
+
+func _ensure_bus(bus_name: StringName) -> void:
+	if AudioServer.get_bus_index(bus_name) != -1:
+		return
+	AudioServer.add_bus()
+	var index := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(index, bus_name)
+	AudioServer.set_bus_send(index, &"Master")
+
+# Make sure to connect these for audio of vignette
+#entity.detect_started.connect(_detect_sting.play)
+#entity.chase_started.connect(_chase_loop.play)
+#entity.chase_ended.connect(_chase_loop.stop)
+#entity.caught_player.connect(_catch_scream.play)
+</file>
+
+<file path="src/entity/states/detect_state.gd">
+class_name DetectState
+extends AIState
+
+@export var confirm_time: float = 1.5
+@export var give_up_time: float = 3.0
+@export var move_speed: float = 3.0
+@export var turn_speed: float = 5.0
+
+var _can_see_player: bool = false
+var _confirm_timer: float = 0.0
+var _give_up_timer: float = 0.0
+var _last_known_position: Vector3
+
+func enter() -> void:
+	_confirm_timer = 0.0
+	_give_up_timer = 0.0
+	_last_known_position = entity.perception.player.global_position
+
+func physics_update(delta: float) -> void:
+	entity.move_towards(_last_known_position, move_speed)
+	if _can_see_player:
+		entity.face_towards(_last_known_position, turn_speed, delta)
+	else:
+		entity.face_movement(turn_speed, delta)
+
+func on_perception_updated(can_see_player: bool, delta: float) -> void:
+	_can_see_player = can_see_player
+	if can_see_player:
+		_last_known_position = entity.perception.player.global_position
+		_give_up_timer = 0.0
+		_confirm_timer += delta
+		if _confirm_timer >= confirm_time:
+			transition_requested.emit("Chase")
+	else:
+		_confirm_timer = 0.0
+		_give_up_timer += delta
+		if _give_up_timer >= give_up_time:
+			transition_requested.emit("Patrol")
+</file>
+
+<file path="src/entity/entity_catch.gd">
+## Area3D placed as a child of the Unseen (AIEntity). If the player is inside it
+## while the entity is in one of the lethal states, the run is over.
+class_name EntityCatch
+extends Area3D
+
+@export var player_group: String = "player"
+## State node names in which touching the player is lethal.
+@export var catch_state_names: Array[String] = ["Chase", "Detect"]
+
+@onready var _entity := get_parent() as AIEntity
+
+func _physics_process(_delta: float) -> void:
+	if _entity == null or not GameState.is_playing():
+		return
+	if not catch_state_names.has(_entity.state_machine.current_state_name):
+		return
+	# Checked every frame (not body_entered) so a player already standing inside
+	# the area when a lethal state starts still gets caught.
+	for body in get_overlapping_bodies():
+		if body.is_in_group(player_group):
+			_entity.caught_player.emit()
+			GameState.game_over()
+			return
+</file>
+
+<file path="src/entity/entity_perception.gd">
+class_name EntityPerception
+extends Node
+
+@export var eyes: Node3D
+@export var player: Node3D
+@export var vision_range: float = 15.0
+@export var vision_half_angle_deg: float = 40.0
+@export var player_group: String = "player"
+## Heights, relative to the player's origin, that the entity tries to see.
+## Head, chest, legs. Seeing any one of them counts as seeing the player.
+@export var sight_point_offsets: Array[float] = [0.8, 0.2, -0.5]
+
+func _ready() -> void:
+	if player == null:
+		player = get_tree().get_first_node_in_group(player_group)
+
+func can_see_player() -> bool:
+	if player == null or eyes == null:
+		return false
+
+	if _player_is_hidden():
+		return false
+
+	var to_player := player.global_position - eyes.global_position
+	if to_player.length() > vision_range:
+		return false
+
+	# Sideways angle only, so height differences on ramps don't shrink the cone.
+	var forward := -eyes.global_transform.basis.z
+	var flat_forward := Vector3(forward.x, 0.0, forward.z).normalized()
+	var flat_to := Vector3(to_player.x, 0.0, to_player.z)
+	if flat_to.length() > 0.01:
+		var angle := rad_to_deg(flat_forward.angle_to(flat_to.normalized()))
+		if angle > vision_half_angle_deg:
+			return false
+
+	return _has_line_of_sight()
+
+func _has_line_of_sight() -> bool:
+	var space_state := eyes.get_world_3d().direct_space_state
+	for y_offset in sight_point_offsets:
+		var query := PhysicsRayQueryParameters3D.create(
+			eyes.global_position,
+			player.global_position + Vector3.UP * y_offset
+		)
+		query.exclude = [eyes.get_parent()]
+		var result := space_state.intersect_ray(query)
+		if result.is_empty() or result.collider == player:
+			return true
+	return false
+
+func _player_is_hidden() -> bool:
+	return player.has_method("is_hidden") and player.is_hidden()
+</file>
+
+<file path="src/player/concealment.gd">
+class_name Concealment
+extends Node
+
+signal concealment_broken
+
+## Optional. If empty, it finds the AIEntity on its own.
+@export var entity: AIEntity
+## Staring at the entity this long (seconds) sends it to Detect, toward the hiding spot.
+@export var suspect_time: float = 1.0
+## Staring this long breaks cover and sends it to Chase. Keep it higher than suspect_time.
+@export var reveal_time: float = 3.0
+
+var is_hidden: bool = false
+## Where the current hiding spot is. Set by HidingSpot / Locker.
+var hiding_position: Vector3 = Vector3.ZERO
+
+var _stare_timer: float = 0.0
+var _suspected: bool = false
+
+## Called by HidingSpot / Locker BEFORE the player is moved, so the entity's
+## vision check still sees where the player was standing when they went in.
+func enter_hiding_spot(spot_position: Vector3) -> void:
+	hiding_position = spot_position
+	_stare_timer = 0.0
+	_suspected = false
+	if _find_entity() and entity.perception.can_see_player():
+		# Seen going in: no cover, and the entity commits to a chase toward the spot.
+		# Transition first: Chase.enter() resets last_known_player_position to where
+		# the player stands right now, so the spot has to be written after it.
+		is_hidden = false
+		entity.state_machine.force_transition("Chase")
+		entity.last_known_player_position = spot_position
+		return
+	is_hidden = true
+
+func exit_hiding_spot() -> void:
+	is_hidden = false
+	_stare_timer = 0.0
+	_suspected = false
+
+func _physics_process(delta: float) -> void:
+	if not is_hidden or not _find_entity():
+		return
+	if GazeSystem.is_watched(entity):
+		_stare_timer += delta
+		if not _suspected and _stare_timer >= suspect_time:
+			_suspected = true
+			entity.last_known_player_position = hiding_position
+			# A chasing entity already heads for last_known_player_position; don't downgrade it.
+			if entity.state_machine.current_state_name != "Chase":
+				entity.state_machine.force_transition("Detect")
+		if _stare_timer >= reveal_time:
+			_break_concealment()
+	else:
+		_stare_timer = max(_stare_timer - delta, 0.0)
+		if _stare_timer == 0.0:
+			_suspected = false
+
+func _break_concealment() -> void:
+	is_hidden = false
+	_stare_timer = 0.0
+	_suspected = false
+	concealment_broken.emit()
+	entity.state_machine.force_transition("Chase")
+
+func _find_entity() -> bool:
+	if entity == null:
+		entity = get_tree().get_first_node_in_group("gaze_watchable") as AIEntity
+	return entity != null
+</file>
+
+<file path="src/player/inventory.gd">
+## Fixed 10 slots, one item per slot, no dropping.
+## Only data and signals here; Randy's UI just listens and calls select_slot().
+class_name Inventory
+extends Node
+
+signal item_added(item: ItemData, slot: int)
+signal item_removed(item: ItemData, slot: int)
+signal selection_changed(slot: int)
+signal ui_toggled(is_open: bool)
+signal item_used(item: ItemData, slot: int)
+
+const MAX_SLOTS: int = 10
+
+## -1 means nothing selected.
+var selected_slot: int = -1
+
+var _slots: Array[ItemData] = []
+var is_ui_open: bool = false
+
+func _ready() -> void:
+	add_to_group("saveable")
+
+func capture_state() -> Dictionary:
+	var paths: Array = []
+	for item in _slots:
+		paths.append(item.resource_path if item != null else "")
+	return {"slots": paths, "selected": selected_slot}
+
+func restore_state(state: Dictionary) -> void:
+	for i in MAX_SLOTS:
+		remove_item(i)
+	var paths: Array = state.get("slots", [])
+	for i in mini(paths.size(), MAX_SLOTS):
+		var path: String = paths[i]
+		if path == "" or not ResourceLoader.exists(path):
+			continue
+		var item := load(path) as ItemData
+		if item == null:
+			continue
+		_slots[i] = item
+		item_added.emit(item, i)
+	select_slot(state.get("selected", -1))
+
+func _init() -> void:
+	_slots.resize(MAX_SLOTS)
+
+## Returns false if every slot is taken.
+func add_item(item: ItemData) -> bool:
+	var slot := _slots.find(null)
+	if slot == -1:
+		return false
+	_slots[slot] = item
+	item_added.emit(item, slot)
+	return true
+
+## Used items are removed this way. Returns the removed item (null if the slot was empty).
+func remove_item(slot: int) -> ItemData:
+	if slot < 0 or slot >= MAX_SLOTS or _slots[slot] == null:
+		return null
+	var item := _slots[slot]
+	_slots[slot] = null
+	item_removed.emit(item, slot)
+	return item
+
+func has_item(id: StringName) -> bool:
+	for item in _slots:
+		if item != null and item.id == id:
+			return true
+	return false
+
+func is_full() -> bool:
+	return not _slots.has(null)
+
+func get_item(slot: int) -> ItemData:
+	if slot < 0 or slot >= MAX_SLOTS:
+		return null
+	return _slots[slot]
+
+## Always MAX_SLOTS long; empty slots are null.
+func get_slots() -> Array[ItemData]:
+	return _slots.duplicate()
+
+func select_slot(slot: int) -> void:
+	if slot < -1 or slot >= MAX_SLOTS or slot == selected_slot:
+		return
+	selected_slot = slot
+	selection_changed.emit(slot)
+
+func get_selected_item() -> ItemData:
+	return get_item(selected_slot)
+
+## Pressing the selected slot's key again deselects it.
+func toggle_slot(slot: int) -> void:
+	select_slot(-1 if slot == selected_slot else slot)
+
+## Wraps around. From "nothing selected", +1 goes to slot 0 and -1 goes to the last slot.
+func cycle_selection(step: int) -> void:
+	if selected_slot == -1:
+		select_slot(0 if step > 0 else MAX_SLOTS - 1)
+	else:
+		select_slot(posmod(selected_slot + step, MAX_SLOTS))
+
+## The mouse is captured while playing, so the UI can't be clicked.
+## Number keys 1-9 and 0 pick slots 1-10; the mouse wheel cycles.
+func _unhandled_input(event: InputEvent) -> void:
+	if not GameState.is_playing():
+		return
+	if event.is_action_pressed("inventory"):
+		set_ui_open(not is_ui_open)
+		return
+	if event.is_action_pressed("use_item"):
+		var held := get_selected_item()
+		if held != null and held.use_action != &"":
+			item_used.emit(held, selected_slot)
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var keycode: int = event.physical_keycode
+		if keycode >= KEY_1 and keycode <= KEY_9:
+			toggle_slot(keycode - KEY_1)
+		elif keycode == KEY_0:
+			toggle_slot(9)
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			cycle_selection(-1)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			cycle_selection(1)
+
+func set_ui_open(value: bool) -> void:
+	if value == is_ui_open:
+		return
+	is_ui_open = value
+	ui_toggled.emit(value)
+</file>
+
+<file path="src/player/player_gaze_caster.gd">
+class_name PlayerGazeCaster
+extends Camera3D
+
+@export var max_gaze_distance: float = 20.0
+@export var gaze_half_angle_deg: float = 12.0
+@export var watchable_group: String = "gaze_watchable"
+
+func _physics_process(delta: float) -> void:
+	var looked_at := _find_gazed_target()
+
+	for target in get_tree().get_nodes_in_group(watchable_group):
+		GazeSystem.report(target, target == looked_at, delta)
+
+func _find_gazed_target() -> Node3D:
+	var camera_position: Vector3 = global_position
+	var camera_forward: Vector3 = -global_transform.basis.z
+
+	var best_target: Node3D = null
+	var best_angle: float = gaze_half_angle_deg
+
+	for target in get_tree().get_nodes_in_group(watchable_group):
+		var target_node: Node3D = target as Node3D
+
+		if target_node == null:
+			continue
+
+		var target_position: Vector3 = target_node.global_position
+		target_position.y += 1.5
+
+		var to_target: Vector3 = target_position - camera_position
+		var distance: float = to_target.length()
+
+		if distance <= 0.001 or distance > max_gaze_distance:
+			continue
+
+		var angle: float = rad_to_deg(
+			camera_forward.angle_to(to_target.normalized())
+		)
+
+		if angle > best_angle:
+			continue
+
+		if not _can_hit_target(target_node):
+			continue
+
+		best_angle = angle
+		best_target = target_node
+
+	return best_target
+
+func _can_hit_target(target: Node3D) -> bool:
+	var space_state := get_world_3d().direct_space_state
+
+	var query := PhysicsRayQueryParameters3D.create(
+		global_position,
+		global_position + (-global_transform.basis.z) * max_gaze_distance
+	)
+
+	var player := get_parent()
+	query.exclude = [player]
+
+	var result := space_state.intersect_ray(query)
+
+	if result.is_empty():
+		return false
+
+	var collider: Node = result.collider as Node
+
+	if collider == null:
+		return false
+
+	return _belongs_to_target(collider, target)
+
+func _belongs_to_target(collider: Node, target: Node3D) -> bool:
+	var current: Node = collider
+
+	while current != null:
+		if current == target:
+			return true
+
+		current = current.get_parent()
+
+	return false
+</file>
+
+<file path="src/world/door.gd">
+## Swinging door. The node's origin is the hinge, so place it at the hinge edge.
+## Leave required_item_id empty for a door that is never locked.
+class_name Door
+extends Interactable
+
+signal unlocked
+signal opened
+signal closed
+
+@export var required_item_id: StringName = &""
+@export var consume_item: bool = true
+@export var open_angle_deg: float = 90.0
+@export var open_time: float = 0.6
+@export var locked_message: String = "It's locked."
+@export var open_loudness: float = 0.5
+# Noise when fail to open
+@export var locked_loudness: float = 0.4
+
+var is_locked: bool = false
+var is_open: bool = false
+
+var _closed_y: float = 0.0
+var _tween: Tween
+
+func _ready() -> void:
+	is_locked = required_item_id != &""
+	_closed_y = rotation.y
+	add_to_group("saveable")
+
+func get_prompt(interactor: Interactor) -> String:
+	if not enabled:
+		return ""
+	if is_open:
+		return "Close"
+	if not is_locked:
+		return "Open"
+	var held := interactor.inventory.get_selected_item()
+	if held != null and held.id == required_item_id:
+		return "Unlock with %s" % held.display_name
+	return "Locked"
+
+func _on_interact(interactor: Interactor) -> void:
+	if is_locked and not _try_unlock(interactor):
+		_emit_noise(interactor, &"door_locked", locked_loudness)
+		return
+	_set_open(not is_open)
+	_emit_noise(interactor, &"door_open" if is_open else &"door_close", open_loudness)
+
+func _emit_noise(interactor: Interactor, noise_type: StringName, loudness: float) -> void:
+	var tracker := LocationTracker.find_on(interactor.get_parent())
+	NoiseManager.emit_noise(
+		noise_type,
+		loudness,
+		tracker.room_id if tracker else &"",
+		tracker.floor_id if tracker else 0,
+		global_position
+	)
+
+func _try_unlock(interactor: Interactor) -> bool:
+	var inventory := interactor.inventory
+	var held := inventory.get_selected_item()
+	if held == null:
+		interactor.show_feedback(locked_message)
+		return false
+	if held.id != required_item_id:
+		interactor.show_feedback("The %s doesn't fit." % held.display_name)
+		return false
+	if consume_item:
+		inventory.remove_item(inventory.selected_slot)
+	is_locked = false
+	unlocked.emit()
+	return true
+
+func _set_open(value: bool) -> void:
+	is_open = value
+	if _tween:
+		_tween.kill()
+	var target := _closed_y
+	if is_open:
+		target += deg_to_rad(open_angle_deg)
+	_tween = create_tween()
+	_tween.tween_property(self, "rotation:y", target, open_time)
+	if is_open:
+		opened.emit()
+	else:
+		closed.emit()
+
+func capture_state() -> Dictionary:
+	return {"locked": is_locked, "open": is_open}
+
+func restore_state(state: Dictionary) -> void:
+	is_locked = state.get("locked", is_locked)
+	is_open = state.get("open", is_open)
+	if _tween:
+		_tween.kill()
+	rotation.y = _closed_y + (deg_to_rad(open_angle_deg) if is_open else 0.0)
+</file>
+
+<file path="src/entity/states/chase_state.gd">
+class_name ChaseState
+extends AIState
+
+@export var base_speed: float = 5.0
+@export var watched_speed_multiplier: float = 1.6
+@export var give_up_time: float = 2.0
+@export var turn_speed: float = 6.0
+
+var _is_watched: bool = false
+var _can_see_player: bool = true
+var _give_up_timer: float = 0.0
+
+func enter() -> void:
+	_is_watched = false
+	_can_see_player = true
+	_give_up_timer = 0.0
+	# Covers entering Chase without having seen the player (e.g. a scripted scare).
+	entity.last_known_player_position = entity.perception.player.global_position
+
+func physics_update(delta: float) -> void:
+	var speed := base_speed * (watched_speed_multiplier if _is_watched else 1.0)
+	# Only homes in on the player while it can see them; otherwise it goes
+	# to the last spot it saw them, so breaking line of sight or hiding works.
+	var target := (
+		entity.perception.player.global_position if _can_see_player
+		else entity.last_known_player_position
+	)
+	entity.move_towards(target, speed)
+	if _can_see_player:
+		entity.face_towards(target, turn_speed, delta)
+	else:
+		entity.face_movement(turn_speed, delta)
+
+func on_gaze_changed(is_watched: bool, _watched_duration: float, _delta: float) -> void:
+	_is_watched = is_watched
+
+func on_perception_updated(can_see_player: bool, delta: float) -> void:
+	_can_see_player = can_see_player
+	if can_see_player:
+		_give_up_timer = 0.0
+	else:
+		_give_up_timer += delta
+		if _give_up_timer >= give_up_time:
+			transition_requested.emit("Search")
+</file>
+
+<file path="src/entity/states/search_state.gd">
+class_name SearchState
+extends AIState
+# Walk to where player is last seen when chase is lost
+# Goes to patrol or detect after
+@export var move_speed: float = 3.5
+@export var turn_speed: float = 5.0
+@export var look_around_time: float = 4.0
+# Radians per second while looking around (1.5 for 4s is almost a full turn).
+@export var look_turn_speed: float = 1.5
+# Search time failsafe
+@export var max_search_time: float = 15.0
+ 
+var _search_position: Vector3
+var _arrived: bool = false
+var _look_timer: float = 0.0
+var _total_timer: float = 0.0
+ 
+func enter() -> void:
+	_arrived = false
+	_look_timer = 0.0
+	_total_timer = 0.0
+	_search_position = entity.last_known_player_position
+ 
+func physics_update(delta: float) -> void:
+	if _search_position.distance_to(entity.last_known_player_position) > 0.5:
+		_search_position = entity.last_known_player_position
+		_arrived = false
+		_look_timer = 0.0
+		_total_timer = 0.0
+ 
+	_total_timer += delta
+	if _total_timer >= max_search_time:
+		transition_requested.emit("Patrol")
+		return
+ 
+	if not _arrived:
+		entity.move_towards(_search_position, move_speed)
+		entity.face_movement(turn_speed, delta)
+		if entity.nav_agent.is_navigation_finished():
+			_arrived = true
+		return
+ 
+	entity.rotate_y(look_turn_speed * delta)
+	_look_timer += delta
+	if _look_timer >= look_around_time:
+		transition_requested.emit("Patrol")
+ 
+func on_perception_updated(can_see_player: bool, _delta: float) -> void:
+	if can_see_player:
+		transition_requested.emit("Detect")
+ 
+func on_noise_alert(_room_id: StringName, _floor_id: int, _world_position: Vector3) -> void:
+	entity.respond_to_noise()
+</file>
+
+<file path="src/player/interactor.gd">
+## Child of Player. Every physics frame it casts a ray from the player's head,
+## finds the Interactable being looked at, and reports it to the HUD.
+class_name Interactor
+extends Node
+
+## The Interactable under the crosshair, or null.
+signal focus_changed(target: Interactable)
+## Text for the prompt. Empty string means hide the prompt.
+signal prompt_changed(text: String)
+## One-off messages like "It's locked." or "Inventory full."
+signal feedback(text: String)
+
+@export var camera: Camera3D
+@export var inventory: Inventory
+## How close the player must be to an Interactable's origin (flat distance, height ignored).
+@export var reach: float = 2.5
+## The ray is this much longer than reach, so colliders set back from an object's
+## visible front (a locker's back wall is 1.2 m behind its front) can still be hit.
+## The reach check uses the Interactable's origin, not the hit point.
+@export var ray_extra: float = 1.5
+## After the ray stops hitting a target, keep it focused this many seconds.
+## Stops one missed frame while walking from dropping the prompt or the E press.
+@export var focus_grace_time: float = 0.15
+@export var interact_action: StringName = &"interact"
+
+var focused: Interactable
+var _forced_focus: Interactable
+var _prompt: String = ""
+var _grace_left: float = 0.0
+
+func _ready() -> void:
+	if camera == null or inventory == null:
+		push_warning("Interactor: assign 'camera' and 'inventory' in the inspector.")
+	GameState.state_changed.connect(_on_game_state_changed)
+
+func _physics_process(delta: float) -> void:
+	if camera == null or not GameState.is_playing():
+		return
+	var target: Interactable = null
+	if is_instance_valid(_forced_focus):
+		target = _forced_focus
+	else:
+		target = _find_target()
+		if target != null:
+			_grace_left = focus_grace_time
+		elif is_instance_valid(focused) and _grace_left > 0.0:
+			_grace_left -= delta
+			target = focused
+	_set_focus(target)
+	_set_prompt(focused.get_prompt(self) if is_instance_valid(focused) else "")
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed(interact_action):
+		return
+	if not GameState.is_playing() or not is_instance_valid(focused):
+		return
+	focused.interact(self)
+
+func show_feedback(text: String) -> void:
+	feedback.emit(text)
+
+func force_focus(target: Interactable) -> void:
+	_forced_focus = target
+
+func release_focus() -> void:
+	_forced_focus = null
+	_grace_left = 0.0
+
+func _find_target() -> Interactable:
+	# The camera bobs while walking; its parent (Head) does not.
+	var head := camera.get_parent() as Node3D
+	var from: Vector3 = (head if head != null else camera).global_position
+	var to := from + (-camera.global_transform.basis.z) * (reach + ray_extra)
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.exclude = [get_parent()]
+	var hit := camera.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return null
+	var node := hit.collider as Node
+	while node != null:
+		if node is Interactable:
+			var found := node as Interactable
+			return found if _in_reach(found, from) else null
+		node = node.get_parent()
+	return null
+
+func _in_reach(target: Interactable, from: Vector3) -> bool:
+	var offset := target.global_position - from
+	return Vector2(offset.x, offset.z).length() <= reach
+
+func _set_focus(target: Interactable) -> void:
+	if target == focused:
+		return
+	focused = target
+	focus_changed.emit(focused)
+
+func _set_prompt(text: String) -> void:
+	if text == _prompt:
+		return
+	_prompt = text
+	prompt_changed.emit(_prompt)
+
+func _on_game_state_changed(_previous: GameState.State, new_state: GameState.State) -> void:
+	if new_state != GameState.State.PLAYING:
+		_grace_left = 0.0
+		_set_focus(null)
+		_set_prompt("")
+</file>
+
+<file path="src/entity/states/patrol_state.gd">
+class_name PatrolState
+extends AIState
+
+@export var route: PatrolRoute
+@export var move_speed: float = 2.0
+@export var turn_speed: float = 4.0
+@export var look_turn_speed: float = 1.0
+@export var min_rooms_per_floor: int = 3
+# Chance (0-1) of leaving for an adjacent floor once min_rooms_per_floor is met.
+@export_range(0.0, 1.0) var floor_change_chance: float = 0.3
+# The last N visited rooms are skipped when picking the next one.
+@export var recent_memory: int = 2
+
+var _has_target: bool = false
+var _target_point: Vector3
+var _target_look_time: float = 0.0
+var _look_left: float = 0.0
+var _flinching: bool = false
+var _recent_rooms: Array[StringName] = []
+var _rooms_on_floor: int = 0
+var _last_floor: int = 0
+
+# Fallback route state.
+var _waypoints: Array[Vector3] = []
+var _waypoint_index: int = 0
+
+func enter() -> void:
+	_flinching = false
+	_has_target = false
+	_look_left = 0.0
+	if route != null:
+		_waypoints = route.get_points()
+	else:
+		_waypoints = []
+	_waypoint_index = clampi(_waypoint_index, 0, maxi(_waypoints.size() - 1, 0))
+
+func physics_update(delta: float) -> void:
+	if _flinching:
+		# Stand and turn to player when staring
+		entity.face_towards(entity.perception.player.global_position, turn_speed, delta)
+		return
+
+	if _look_left > 0.0:
+		_look_left -= delta
+		entity.rotate_y(look_turn_speed * delta)
+		return
+
+	if not _has_target:
+		_choose_target()
+		if not _has_target:
+			_follow_route()
+			return
+
+	entity.move_towards(_target_point, move_speed)
+	entity.face_movement(turn_speed, delta)
+	if entity.nav_agent.is_navigation_finished():
+		_has_target = false
+		_look_left = _target_look_time
+
+func on_gaze_changed(is_watched: bool, _watched_duration: float, _delta: float) -> void:
+	_flinching = is_watched
+
+func on_perception_updated(can_see_player: bool, _delta: float) -> void:
+	if can_see_player:
+		transition_requested.emit("Detect")
+
+func on_noise_alert(_room_id: StringName, _floor_id: int, _world_position: Vector3) -> void:
+	entity.respond_to_noise()
+
+func _choose_target() -> void:
+	_has_target = false
+	var current_floor := entity.location.floor_id
+	if current_floor != _last_floor:
+		_last_floor = current_floor
+		_rooms_on_floor = 0
+
+	var target_floor := current_floor
+	if _rooms_on_floor >= min_rooms_per_floor and randf() < floor_change_chance:
+		target_floor = _pick_adjacent_floor(current_floor)
+
+	var zone := _pick_zone(target_floor)
+	if zone == null:
+		return
+
+	var points := zone.get_patrol_points()
+	if points.is_empty():
+		_target_point = zone.global_position
+	else:
+		_target_point = points[randi() % points.size()]
+	_target_look_time = zone.look_around_time
+	_has_target = true
+	_rooms_on_floor += 1
+
+	_recent_rooms.append(zone.room_id)
+	while _recent_rooms.size() > recent_memory:
+		_recent_rooms.pop_front()
+
+func _pick_zone(floor_id: int) -> RoomZone:
+	var zones: Array[RoomZone] = []
+	for node in get_tree().get_nodes_in_group("room_zones"):
+		var zone := node as RoomZone
+		if zone != null and zone.floor_id == floor_id and zone.patrol_weight > 0.0:
+			zones.append(zone)
+	if zones.is_empty():
+		return null
+
+	# Skip recently visited rooms unless no other choices
+	var pool: Array[RoomZone] = []
+	for zone in zones:
+		if not _recent_rooms.has(zone.room_id):
+			pool.append(zone)
+	if pool.is_empty():
+		pool = zones
+
+	var total := 0.0
+	for zone in pool:
+		total += zone.patrol_weight
+	var roll := randf() * total
+	for zone in pool:
+		roll -= zone.patrol_weight
+		if roll <= 0.0:
+			return zone
+	return pool.back()
+
+func _pick_adjacent_floor(current_floor: int) -> int:
+	var floors: Array[int] = []
+	for node in get_tree().get_nodes_in_group("room_zones"):
+		var zone := node as RoomZone
+		if zone != null and absi(zone.floor_id - current_floor) == 1 and not floors.has(zone.floor_id):
+			floors.append(zone.floor_id)
+	if floors.is_empty():
+		return current_floor
+	return floors[randi() % floors.size()]
+
+func _follow_route() -> void:
+	if _waypoints.is_empty():
+		return
+	entity.move_towards(_waypoints[_waypoint_index], move_speed)
+	entity.face_movement(turn_speed, get_physics_process_delta_time())
+	if entity.nav_agent.is_navigation_finished():
+		_waypoint_index = (_waypoint_index + 1) % _waypoints.size()
+</file>
+
+<file path="src/player/player.gd">
+class_name Player
+extends CharacterBody3D
+
+@export var move_speed: float = 4.0
+@export var sprint_speed: float = 7.0
+@export var mouse_sensitivity: float = 0.003
+@export var min_pitch_deg: float = -80.0
+@export var max_pitch_deg: float = 80.0
+
+@export var step_height: float = 0.6
+@export var step_check_distance: float = 0.6
+## Distance from the player's origin down to the bottom of the capsule.
+## Capsule is centered at y=0.1 with height 1.8, so the bottom is at -0.8.
+@export var feet_offset: float = 0.8
+@onready var head: Node3D = $Head
+@onready var hide_component: Node = $Hide   # Concealment.gd — exposes `is_hidden`
+
+@export var bob_walk_frequency: float = 10.0
+@export var bob_sprint_frequency: float = 15.0
+@export var bob_walk_amplitude: float = 0.04
+@export var bob_sprint_amplitude: float = 0.08
+@export var bob_return_speed: float = 8.0
+@onready var camera: Camera3D = $Head/Camera3D
+var _bob_time: float = 0.0
+var _camera_rest_position: Vector3
+var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+# True while hiding in a Locker: no walking, and the view is limited.
+var controls_locked: bool = false
+var _look_limited: bool = false
+var _yaw_center: float = 0.0
+var _yaw_half_range: float = 0.0
+var _pitch_half_range: float = 0.0
+# Used in locker tween
+var _look_frozen: bool = false
+
+func _ready() -> void:
+	add_to_group("player")
+	add_to_group("saveable")
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_camera_rest_position = camera.position
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not _look_frozen:
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		head.rotate_x(-event.relative.y * mouse_sensitivity)
+		var pitch_min := deg_to_rad(min_pitch_deg)
+		var pitch_max := deg_to_rad(max_pitch_deg)
+		if _look_limited:
+			rotation.y = _yaw_center + clampf(
+				angle_difference(_yaw_center, rotation.y), -_yaw_half_range, _yaw_half_range
+			)
+			pitch_min = -_pitch_half_range
+			pitch_max = _pitch_half_range
+		head.rotation.x = clamp(head.rotation.x, pitch_min, pitch_max)
+
+func _update_head_bob(delta: float, sprinting: bool) -> void:
+	var horizontal_speed := Vector2(velocity.x, velocity.z).length()
+
+	if is_on_floor() and horizontal_speed > 0.5:
+		var frequency := bob_sprint_frequency if sprinting else bob_walk_frequency
+		var amplitude := bob_sprint_amplitude if sprinting else bob_walk_amplitude
+		_bob_time += delta * frequency
+		# Up and down once per step, side to side once per two steps.
+		camera.position.y = _camera_rest_position.y + sin(_bob_time) * amplitude
+		camera.position.x = _camera_rest_position.x + cos(_bob_time * 0.5) * amplitude * 0.5
+	else:
+		# Standing still, in the air, or pushing against a wall: ease back to rest.
+		_bob_time = 0.0
+		camera.position = camera.position.lerp(
+			_camera_rest_position, clamp(bob_return_speed * delta, 0.0, 1.0)
+		)
+
+func _physics_process(delta: float) -> void:
+	if controls_locked:
+		velocity = Vector3.ZERO
+		return
+
+	if not is_on_floor():
+		velocity.y -= _gravity * delta
+
+	var sprinting := Input.is_action_pressed("sprint")
+	var current_speed := sprint_speed if sprinting else move_speed
+	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
+
+	if direction:
+		velocity.x = direction.x * current_speed
+		velocity.z = direction.z * current_speed
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, current_speed)
+		velocity.z = move_toward(velocity.z, 0.0, current_speed)
+
+	move_and_slide()
+	_update_head_bob(delta, sprinting)
+
+func is_hidden() -> bool:
+	return hide_component.is_hidden
+
+func lock_controls(yaw_center: float, yaw_half_range_deg: float, pitch_half_range_deg: float) -> void:
+	controls_locked = true
+	velocity = Vector3.ZERO
+	_look_limited = true
+	_yaw_center = yaw_center
+	_yaw_half_range = deg_to_rad(yaw_half_range_deg)
+	_pitch_half_range = deg_to_rad(pitch_half_range_deg)
+	rotation.y = yaw_center
+	head.rotation.x = 0.0
+	camera.position = _camera_rest_position
+	_look_frozen = false
+
+func unlock_controls() -> void:
+	controls_locked = false
+	_look_limited = false
+	_look_frozen = false
+
+func freeze_controls() -> void:
+	controls_locked = true
+	velocity = Vector3.ZERO
+	_look_frozen = true
+
+func capture_state() -> Dictionary:
+	return {
+		"position": global_position,
+		"yaw": rotation.y,
+		"pitch": head.rotation.x,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	unlock_controls()
+	velocity = Vector3.ZERO
+	global_position = state.get("position", global_position)
+	rotation.y = state.get("yaw", rotation.y)
+	head.rotation.x = state.get("pitch", 0.0)
+
+func get_save_summary() -> Dictionary:
+	var tracker := LocationTracker.find_on(self)
+	if tracker == null:
+		return {}
+	return {"room_id": tracker.room_id, "floor_id": tracker.floor_id}
+</file>
+
+<file path="src/entity/ai_entity.gd">
+class_name AIEntity
+extends CharacterBody3D
+
+signal woke
+signal slept
+signal detect_started
+signal detect_ended
+signal chase_started
+signal chase_ended
+signal caught_player 
+
+@export var starts_dormant: bool = false
+
+@export var perception: EntityPerception
+@export var state_machine: AIStateMachine
+@export var nav_agent: NavigationAgent3D
+
+## How close (flat, height ignored) the entity must get to a point on the red line
+## before it turns toward the next one. Smaller = takes corners tighter.
+@export var path_reach: float = 0.2
+@export var repath_interval: float = 0.4
+
+var location: LocationTracker
+var hearing: EntityHearing
+
+# Where the entity believes the player is, from sight or noise.
+# Updated every frame the entity can see the player. Used by Chase and Search.
+var last_known_player_position: Vector3
+
+var noise_room_id: StringName = &""
+var noise_floor_id: int = 0
+var noise_position: Vector3
+
+var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var _path: PackedVector3Array = PackedVector3Array()
+var _path_index: int = 0
+var _path_target: Vector3 = Vector3.INF
+var _repath_left: float = 0.0
+var _move_direction: Vector3 = Vector3.ZERO
+
+var is_active: bool = true
+var _default_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
+
+func _ready() -> void:
+	_default_process_mode = process_mode
+	add_to_group("gaze_watchable")
+	floor_snap_length = 0.5
+	for child in get_children():
+		if child is LocationTracker:
+			location = child as LocationTracker
+		elif child is EntityHearing:
+			hearing = child as EntityHearing
+	if location == null:
+		push_warning("AIEntity: add a LocationTracker child.")
+	if hearing:
+		hearing.noise_alert.connect(_on_noise_alert)
+	if state_machine:
+		state_machine.state_changed.connect(_on_state_changed)
+	if starts_dormant:
+		sleep()
+
+## Invisible, no physics body, no AI. Also usable mid-game.
+func sleep() -> void:
+	if not is_active:
+		return
+	is_active = false
+	visible = false
+	velocity = Vector3.ZERO
+	_path = PackedVector3Array()
+	process_mode = Node.PROCESS_MODE_DISABLED
+	slept.emit()
+
+## Starts the entity from wherever it is placed in Patrol.
+func wake() -> void:
+	if is_active:
+		return
+	is_active = true
+	visible = true
+	process_mode = _default_process_mode
+	state_machine.force_transition("Patrol")
+	woke.emit()
+
+func _physics_process(delta: float) -> void:
+	var sees_player := perception.can_see_player()
+	if sees_player:
+		last_known_player_position = perception.player.global_position
+	state_machine.notify_perception(sees_player, delta)
+	state_machine.notify_gaze(
+		GazeSystem.is_watched(self),
+		GazeSystem.get_watched_duration(self),
+		delta
+	)
+
+# Called by the states that respond to noise
+func respond_to_noise() -> void:
+	if noise_floor_id != location.floor_id:
+		state_machine.force_transition("Investigate")
+	else:
+		last_known_player_position = noise_position
+		state_machine.force_transition("Search")
+
+func _on_noise_alert(room_id: StringName, floor_id: int, world_position: Vector3) -> void:
+	noise_room_id = room_id
+	noise_floor_id = floor_id
+	noise_position = world_position
+	state_machine.notify_noise(room_id, floor_id, world_position)
+
+func move_towards(target_position: Vector3, speed: float) -> void:
+	var delta := get_physics_process_delta_time()
+
+	# Kept as before: the states still ask nav_agent.is_navigation_finished().
+	nav_agent.target_position = target_position
+
+	# Recalculate the path when the target moved, or every repath_interval seconds.
+	_repath_left -= delta
+	if _path.is_empty() or _repath_left <= 0.0 or _path_target.distance_to(target_position) > 0.5:
+		_path = NavigationServer3D.map_get_path(
+			nav_agent.get_navigation_map(), global_position, target_position, true
+		)
+		_path_index = 0
+		_path_target = target_position
+		_repath_left = repath_interval
+
+	var horizontal := Vector3.ZERO
+	if not _path.is_empty():
+		# Never smaller than one frame of travel, so a fast entity can't jump past a point.
+		var reach := maxf(path_reach, speed * delta * 1.5)
+		while _path_index < _path.size() - 1 and _flat_distance_to(_path[_path_index]) < reach:
+			_path_index += 1
+		var to_point := _path[_path_index] - global_position
+		to_point.y = 0.0
+		if to_point.length() > 0.05:
+			horizontal = to_point.normalized() * speed
+	_move_direction = horizontal.normalized()
+	velocity.x = horizontal.x
+	velocity.z = horizontal.z
+	if is_on_floor():
+		velocity.y = 0.0
+	else:
+		velocity.y -= _gravity * delta
+	move_and_slide()
+
+func _flat_distance_to(point: Vector3) -> float:
+	return Vector2(point.x - global_position.x, point.z - global_position.z).length()
+
+func face_towards(target_position: Vector3, turn_speed: float, delta: float) -> void:
+	var flat_target := target_position
+	flat_target.y = global_position.y
+	if global_position.distance_to(flat_target) < 0.01:
+		return
+	var current := global_transform.basis.get_rotation_quaternion()
+	var wanted := global_transform.looking_at(flat_target, Vector3.UP).basis.get_rotation_quaternion()
+	var turned := current.slerp(wanted, clamp(turn_speed * delta, 0.0, 1.0))
+	global_transform.basis = Basis(turned)
+
+## Turns toward the direction the body is actually walking (the next stretch of the path).
+func face_movement(turn_speed: float, delta: float) -> void:
+	if _move_direction == Vector3.ZERO:
+		return
+	face_towards(global_position + _move_direction, turn_speed, delta)
+
+func capture_state() -> Dictionary:
+	return {
+		"position": global_position,
+		"yaw": rotation.y,
+		"state": state_machine.current_state_name,
+		"last_known": last_known_player_position,
+		"is_active": is_active,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	velocity = Vector3.ZERO
+	_path = PackedVector3Array()
+	global_position = state.get("position", global_position)
+	rotation.y = state.get("yaw", rotation.y)
+	is_active = state.get("is_active", true)
+	state_machine.force_transition(state.get("state", "Patrol"))
+	last_known_player_position = state.get("last_known", last_known_player_position)
+
+func _on_state_changed(previous: String, new_state: String) -> void:
+	if previous == "Detect":
+		detect_ended.emit()
+	if previous == "Chase":
+		chase_ended.emit()
+	if new_state == "Detect":
+		detect_started.emit()
+	elif new_state == "Chase":
+		chase_started.emit()
+</file>
+
+</files>

@@ -1,8 +1,8 @@
-## Put this on the ROOT Control of a pause, game over or win screen (full rect, inside a CanvasLayer).
-## One script for all three: pick which GameState state shows it in "show_on_state".
-## It hides itself otherwise and listens to GameState.state_changed, so nothing else
-## needs to know it exists. Buttons are optional Inspector slots; leave one empty if the
-## screen doesn't have it (a win screen has no Resume, a pause screen has no Restart).
+# To Randy: Put this on the ROOT Control of a pause, game over or win screen (full rect, inside a CanvasLayer).
+# One script for all three: pick which GameState state shows it in "show_on_state".
+# Listens to GameState.state_changed
+# Buttons are optional Inspector slots; leave one empty if the screen doesn't have it
+# (a win screen has no Resume, a pause screen has no Restart).
 class_name StateScreen
 extends Control
 
@@ -10,13 +10,13 @@ signal screen_shown
 signal screen_hidden
 
 @export_enum("PAUSED", "GAME_OVER", "WIN") var show_on_state: String = "GAME_OVER"
-## Wait this long before appearing. 0.8 on the game over screen lets the camera shake play first.
+# Wait this long before appearing. 0.8 on the game over screen lets the camera shake play first.
 @export var show_delay: float = 0.0
 @export var fade_in_time: float = 0.4
 @export var resume_button: BaseButton
 @export var restart_button: BaseButton
 @export var menu_button: BaseButton
-## Scene the menu button goes to (the main menu).
+# Scene the menu button goes to (the main menu).
 @export_file("*.tscn") var menu_scene: String = ""
 
 var _token: int = 0

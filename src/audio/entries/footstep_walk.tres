@@ -11,5 +11,5 @@
 script = ExtResource("1_qfsul")
 id = &"footstep_walk"
 streams = Array[AudioStream]([ExtResource("2_pgwd3"), ExtResource("3_2sfl2"), ExtResource("4_6f3yp"), ExtResource("5_40ikd"), ExtResource("6_0dlsv")])
-volume_db = -10.0
+volume_db = -12.0
 metadata/_custom_type_script = "uid://brgirdsoro74i"

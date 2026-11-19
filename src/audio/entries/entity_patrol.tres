@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://fqmof0xsmb3s"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_1f5dl"]
+[ext_resource type="AudioStream" uid="uid://c1mi4y76ux0fb" path="res://assets/audio/horror-tension-sfx-lite/ghost_breath_01.wav" id="2_78mih"]
+[ext_resource type="AudioStream" uid="uid://c2foci3mr1h40" path="res://assets/audio/qubodup-wav-ghostmoan/qubodup-GhostMoan01.wav" id="3_va2oa"]
+[ext_resource type="AudioStream" uid="uid://dg2pr3bore166" path="res://assets/audio/qubodup-wav-ghostmoan/qubodup-GhostMoan02.wav" id="4_sd3y5"]
+[ext_resource type="AudioStream" uid="uid://c6po7mxsvv4hp" path="res://assets/audio/qubodup-wav-ghostmoan/qubodup-GhostMoan03.wav" id="5_d3u40"]
+[ext_resource type="AudioStream" uid="uid://cc57hydc0j13t" path="res://assets/audio/qubodup-wav-ghostmoan/qubodup-GhostMoan04.wav" id="6_6owpe"]
+[ext_resource type="AudioStream" uid="uid://um834kcdhpru" path="res://assets/audio/qubodup-wav-ghostmoan/qubodup-GhostMoan05.wav" id="7_cudrn"]
+
+[resource]
+script = ExtResource("1_1f5dl")
+id = &"entity_patrol"
+streams = Array[AudioStream]([ExtResource("2_78mih"), ExtResource("3_va2oa"), ExtResource("4_sd3y5"), ExtResource("5_d3u40"), ExtResource("6_6owpe"), ExtResource("7_cudrn")])
+volume_db = -12.0
+metadata/_custom_type_script = "uid://brgirdsoro74i"
