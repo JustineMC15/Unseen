@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://dddpdhjsslao6"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_qfsul"]
+[ext_resource type="AudioStream" uid="uid://dgkn83srxttsi" path="res://assets/audio/40 Free PSX Footsteps/Concrete/Footstep Concrete 1.ogg" id="2_pgwd3"]
+[ext_resource type="AudioStream" uid="uid://bwgi54cikt8xn" path="res://assets/audio/40 Free PSX Footsteps/Concrete/Footstep Concrete 2.ogg" id="3_2sfl2"]
+[ext_resource type="AudioStream" uid="uid://dkma0lu8pgy0e" path="res://assets/audio/40 Free PSX Footsteps/Concrete/Footstep Concrete 3.ogg" id="4_6f3yp"]
+[ext_resource type="AudioStream" uid="uid://dv6wwgino7moe" path="res://assets/audio/40 Free PSX Footsteps/Concrete/Footstep Concrete 4.ogg" id="5_40ikd"]
+[ext_resource type="AudioStream" uid="uid://dxrnwqy2w2qar" path="res://assets/audio/40 Free PSX Footsteps/Concrete/Footstep Concrete 5.ogg" id="6_0dlsv"]
+
+[resource]
+script = ExtResource("1_qfsul")
+id = &"footstep_walk"
+streams = Array[AudioStream]([ExtResource("2_pgwd3"), ExtResource("3_2sfl2"), ExtResource("4_6f3yp"), ExtResource("5_40ikd"), ExtResource("6_0dlsv")])
+volume_db = -10.0
+metadata/_custom_type_script = "uid://brgirdsoro74i"

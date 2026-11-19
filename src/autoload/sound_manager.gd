@@ -128,6 +128,7 @@ func _on_game_state_changed(_previous: GameState.State, new_state: GameState.Sta
 			_set_loops_paused(true)
 		GameState.State.PLAYING:
 			_set_loops_paused(false)
+			stop_loop(&"menu_music")
 		GameState.State.GAME_OVER:
 			stop_all_loops(0.3)
 			play(&"game_over")
@@ -136,6 +137,7 @@ func _on_game_state_changed(_previous: GameState.State, new_state: GameState.Sta
 			play(&"win")
 		GameState.State.MENU:
 			stop_all_loops(0.5)
+			start_loop(&"menu_music")
 
 func _on_node_added(node: Node) -> void:
 	if node is Player:

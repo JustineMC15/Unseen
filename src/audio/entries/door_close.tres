@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://bx6h1ghcvwphg"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_i3hwt"]
+[ext_resource type="AudioStream" uid="uid://b46l2wrixd5nt" path="res://assets/audio/qubodup-door-ogg/qubodup-DoorClose01.ogg" id="2_l0yf4"]
+[ext_resource type="AudioStream" uid="uid://duxv5oodbk765" path="res://assets/audio/qubodup-door-ogg/qubodup-DoorClose02.ogg" id="3_6yn2b"]
+[ext_resource type="AudioStream" uid="uid://sd1jjpxtfkce" path="res://assets/audio/qubodup-door-ogg/qubodup-DoorClose07.ogg" id="4_67xu1"]
+[ext_resource type="AudioStream" uid="uid://co3cg10bfoxho" path="res://assets/audio/qubodup-door-ogg/qubodup-DoorClose08.ogg" id="5_asdjy"]
+[ext_resource type="AudioStream" uid="uid://dovw5gxwjgdvi" path="res://assets/audio/qubodup-door-ogg/qubodup-DoorClose10.ogg" id="6_8i2cp"]
+
+[resource]
+script = ExtResource("1_i3hwt")
+id = &"door_close"
+streams = Array[AudioStream]([ExtResource("2_l0yf4"), ExtResource("3_6yn2b"), ExtResource("4_67xu1"), ExtResource("5_asdjy"), ExtResource("6_8i2cp")])
+metadata/_custom_type_script = "uid://brgirdsoro74i"

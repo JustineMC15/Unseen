@@ -1,6 +1,16 @@
 [gd_scene format=3 uid="uid://btywa5pqsybkn"]
 
 [ext_resource type="Script" uid="uid://mpsuqnm5mapw" path="res://src/autoload/sound_manager.gd" id="1_is24e"]
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="2_ilqm1"]
+[ext_resource type="Resource" uid="uid://eyggvscm5gd5" path="res://src/audio/entries/menu_music.tres" id="3_mneas"]
+[ext_resource type="Resource" uid="uid://vr4kbguhyc01" path="res://src/audio/entries/ambience.tres" id="4_c8c2r"]
+[ext_resource type="Resource" uid="uid://q1tvjory8ig8" path="res://src/audio/entries/flashlight_click.tres" id="5_01xtf"]
+[ext_resource type="Resource" uid="uid://b6cm6mb54qmg5" path="res://src/audio/entries/item_pickup.tres" id="6_2n62l"]
+[ext_resource type="Resource" uid="uid://dddpdhjsslao6" path="res://src/audio/entries/footstep_walk.tres" id="7_jv0it"]
+[ext_resource type="Resource" uid="uid://cpw8607cmpmqq" path="res://src/audio/entries/footstep_sprint.tres" id="8_n5oej"]
+[ext_resource type="Resource" uid="uid://babk0nk31lpvr" path="res://src/audio/entries/door_open.tres" id="9_vyq05"]
+[ext_resource type="Resource" uid="uid://bx6h1ghcvwphg" path="res://src/audio/entries/door_close.tres" id="10_2n62l"]
 
 [node name="SoundManager" type="Node" unique_id=641939431]
 script = ExtResource("1_is24e")
+entries = Array[ExtResource("2_ilqm1")]([ExtResource("3_mneas"), ExtResource("4_c8c2r"), ExtResource("5_01xtf"), ExtResource("6_2n62l"), ExtResource("7_jv0it"), ExtResource("8_n5oej"), ExtResource("9_vyq05"), ExtResource("10_2n62l"), null, null, null, null, null, null, null, null, null, null])

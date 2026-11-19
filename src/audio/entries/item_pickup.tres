@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://b6cm6mb54qmg5"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_cp4m0"]
+[ext_resource type="AudioStream" uid="uid://ry7kwi8203nh" path="res://assets/audio/868088__kinitdev__shaking-keys.mp3" id="2_74jna"]
+
+[resource]
+script = ExtResource("1_cp4m0")
+id = &"item_pickup"
+streams = Array[AudioStream]([ExtResource("2_74jna")])
+metadata/_custom_type_script = "uid://brgirdsoro74i"

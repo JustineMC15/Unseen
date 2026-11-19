@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://eyggvscm5gd5"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_erddt"]
+[ext_resource type="AudioStream" uid="uid://bgieprweysfup" path="res://assets/audio/Iwan Gabovitch - Dark Ambience Loop.ogg" id="2_pve4r"]
+
+[resource]
+script = ExtResource("1_erddt")
+id = &"menu_music"
+streams = Array[AudioStream]([ExtResource("2_pve4r")])
+volume_db = -4.0
+metadata/_custom_type_script = "uid://brgirdsoro74i"

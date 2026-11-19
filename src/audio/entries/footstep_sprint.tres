@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SoundEntry" format=3 uid="uid://cpw8607cmpmqq"]
+
+[ext_resource type="Script" uid="uid://brgirdsoro74i" path="res://src/audio/sound_entry.gd" id="1_x2lgp"]
+[ext_resource type="AudioStream" uid="uid://13xoagow2htp" path="res://assets/audio/40 Free PSX Footsteps/Stone-run/Footstep Stone 1.ogg" id="2_1jmht"]
+[ext_resource type="AudioStream" uid="uid://b5lw4rkxefqga" path="res://assets/audio/40 Free PSX Footsteps/Stone-run/Footstep Stone 2.ogg" id="3_2ddwf"]
+[ext_resource type="AudioStream" uid="uid://bqqbrnida2jbh" path="res://assets/audio/40 Free PSX Footsteps/Stone-run/Footstep Stone 3.ogg" id="4_dacas"]
+[ext_resource type="AudioStream" uid="uid://dsyuudlmwyvt7" path="res://assets/audio/40 Free PSX Footsteps/Stone-run/Footstep Stone 4.ogg" id="5_n6nxn"]
+[ext_resource type="AudioStream" uid="uid://dixv8aq8aolht" path="res://assets/audio/40 Free PSX Footsteps/Stairs-run/Footstep Stairs 1.ogg" id="6_0jqr8"]
+[ext_resource type="AudioStream" uid="uid://x648b5trjiib" path="res://assets/audio/40 Free PSX Footsteps/Stairs-run/Footstep Stairs 2.ogg" id="7_euibg"]
+[ext_resource type="AudioStream" uid="uid://db80rup3mktng" path="res://assets/audio/40 Free PSX Footsteps/Stairs-run/Footstep Stairs 3.ogg" id="8_bshwk"]
+[ext_resource type="AudioStream" uid="uid://cx12bfprc6qsm" path="res://assets/audio/40 Free PSX Footsteps/Stairs-run/Footstep Stairs 4.ogg" id="9_36yjk"]
+[ext_resource type="AudioStream" uid="uid://c28vr0pfuwxyq" path="res://assets/audio/40 Free PSX Footsteps/Stairs-run/Footstep Stairs 5.ogg" id="10_cjf3u"]
+
+[resource]
+script = ExtResource("1_x2lgp")
+id = &"footstep_sprint"
+streams = Array[AudioStream]([ExtResource("2_1jmht"), ExtResource("3_2ddwf"), ExtResource("4_dacas"), ExtResource("5_n6nxn"), ExtResource("6_0jqr8"), ExtResource("7_euibg"), ExtResource("8_bshwk"), ExtResource("9_36yjk"), ExtResource("10_cjf3u")])
+volume_db = -5.0
+metadata/_custom_type_script = "uid://brgirdsoro74i"
