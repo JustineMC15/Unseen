@@ -1,6 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://ds5ocufp4306v"]
+[gd_scene format=3 uid="uid://ds5ocufp4306v"]
 
-[ext_resource type="Script" uid="uid://dbkqs6gymtqof" path="res://src/inventory/inventory_slot.gd" id="1_0s8hj"]
+[ext_resource type="Script" uid="uid://dbkqs6gymtqof" path="res://src/ui/inventory/inventory_slot.gd" id="1_0s8hj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0s8hj"]
 bg_color = Color(0.078431375, 0.06666667, 0.05490196, 1)
@@ -46,7 +46,7 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
-[node name="InventorySlot" type="Button"]
+[node name="InventorySlot" type="Button" unique_id=944494606]
 custom_minimum_size = Vector2(88, 88)
 offset_right = 88.0
 offset_bottom = 88.0
@@ -57,12 +57,12 @@ toggle_mode = true
 action_mode = 0
 script = ExtResource("1_0s8hj")
 
-[node name="ItemIcon" type="TextureRect" parent="."]
+[node name="ItemIcon" type="TextureRect" parent="." unique_id=1636587415]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="SelectionBorder" type="Panel" parent="."]
+[node name="SelectionBorder" type="Panel" parent="." unique_id=2104229938]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -73,12 +73,12 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hp0l3")
 
-[node name="QuantityLabel" type="Label" parent="."]
+[node name="QuantityLabel" type="Label" parent="." unique_id=1020247720]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 
-[node name="SlotNumber" type="Label" parent="."]
+[node name="SlotNumber" type="Label" parent="." unique_id=462627375]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0

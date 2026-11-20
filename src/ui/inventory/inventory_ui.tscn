@@ -1,0 +1,288 @@
+[gd_scene format=3 uid="uid://02h5vnw50n0v"]
+
+[ext_resource type="Script" uid="uid://c65k7nfhmrqfr" path="res://src/ui/inventory/inventory_ui.gd" id="1_8dspt"]
+[ext_resource type="PackedScene" uid="uid://ds5ocufp4306v" path="res://src/ui/inventory/inventory_slot.tscn" id="2_lpi3s"]
+[ext_resource type="Texture2D" uid="uid://bx4kaxssb0bv8" path="res://assets/background/unseen_bg.jpg" id="2_off0g"]
+[ext_resource type="Texture2D" uid="uid://20b72j21qfx4" path="res://assets/background/inventory_panel_ui.png" id="3_ccru2"]
+[ext_resource type="FontFile" uid="uid://djgj6f3thuvxf" path="res://assets/fonts/stat_ft.ttf" id="3_gpa2l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d2opc"]
+bg_color = Color(0.0627451, 0.05882353, 0.05490196, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.31764707, 0.28627452, 0.2627451, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ccru2"]
+bg_color = Color(0.09019608, 0.078431375, 0.07058824, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.31764707, 0.28627452, 0.2627451, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tgvcm"]
+bg_color = Color(0.1882353, 0.1254902, 0.11372549, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.54509807, 0.16078432, 0.16078432, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tgvcm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tu7mv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ukdvo"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d080i"]
+
+[node name="InventoryUI" type="Control" unique_id=2128095972]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8dspt")
+
+[node name="Background" type="TextureRect" parent="." unique_id=604478711]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_off0g")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DarkOverlay" type="ColorRect" parent="." unique_id=1532365266]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.21176471)
+
+[node name="PanelFrame" type="TextureRect" parent="." unique_id=721047387]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -25.0
+offset_top = -14.0
+offset_right = 21.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_ccru2")
+expand_mode = 1
+
+[node name="MainMargin" type="MarginContainer" parent="." unique_id=7530270]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 90
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 90
+theme_override_constants/margin_bottom = 60
+
+[node name="MainLayout" type="VBoxContainer" parent="MainMargin" unique_id=1708000338]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TopNavigation" type="HBoxContainer" parent="MainMargin/MainLayout" unique_id=1893995684]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+size_flags_vertical = 2
+theme_override_constants/separation = 48
+alignment = 1
+
+[node name="LeftSpacer" type="Control" parent="MainMargin/MainLayout/TopNavigation" unique_id=673246396]
+custom_minimum_size = Vector2(68, 80)
+layout_mode = 2
+
+[node name="ContentContainer" type="HBoxContainer" parent="MainMargin/MainLayout" unique_id=1635160280]
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 48
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainMargin/MainLayout/ContentContainer" unique_id=81611901]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+theme_override_constants/separation = 14
+
+[node name="ItemsTitle" type="Label" parent="MainMargin/MainLayout/ContentContainer/LeftPanel" unique_id=1347904483]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8509804, 0.8, 0.6901961, 1)
+theme_override_fonts/font = ExtResource("3_gpa2l")
+theme_override_font_sizes/font_size = 35
+text = "Items"
+
+[node name="InventoryGrid" type="GridContainer" parent="MainMargin/MainLayout/ContentContainer/LeftPanel" unique_id=1735725430]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 5
+
+[node name="InventorySlot" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=548034061 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot4" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=272584119 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot7" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=2037938296 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot8" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=469296357 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot9" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=1367314409 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot10" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=78753911 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot5" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=1722626741 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot6" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=1355096080 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot2" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=1744850198 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="InventorySlot3" parent="MainMargin/MainLayout/ContentContainer/LeftPanel/InventoryGrid" unique_id=1404617318 instance=ExtResource("2_lpi3s")]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+
+[node name="RightPanel" type="VBoxContainer" parent="MainMargin/MainLayout/ContentContainer" unique_id=1054396051]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+theme_override_constants/separation = 12
+
+[node name="PreviewFrame" type="PanelContainer" parent="MainMargin/MainLayout/ContentContainer/RightPanel" unique_id=721553081]
+custom_minimum_size = Vector2(0, 280)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_d2opc")
+
+[node name="ItemPreview" type="TextureRect" parent="MainMargin/MainLayout/ContentContainer/RightPanel/PreviewFrame" unique_id=383084225]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 230)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ItemName" type="Label" parent="MainMargin/MainLayout/ContentContainer/RightPanel" unique_id=636238681]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78431374, 0.7411765, 0.7019608, 1)
+theme_override_font_sizes/font_size = 30
+text = "Item Name"
+vertical_alignment = 1
+
+[node name="ItemDescription" type="RichTextLabel" parent="MainMargin/MainLayout/ContentContainer/RightPanel" unique_id=799041307]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/default_color = Color(0.50980395, 0.47843137, 0.4509804, 1)
+theme_override_font_sizes/normal_font_size = 18
+text = "Item description goes here..."
+scroll_active = false
+
+[node name="ActionContainer" type="HBoxContainer" parent="MainMargin/MainLayout/ContentContainer/RightPanel" unique_id=810036969]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="UseButton" type="Button" parent="MainMargin/MainLayout/ContentContainer/RightPanel/ActionContainer" unique_id=1813255228]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_ccru2")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tgvcm")
+text = "USE ITEM"
+
+[node name="BottomSpacer" type="Control" parent="MainMargin/MainLayout/ContentContainer/RightPanel" unique_id=204093705]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="BottomControls" type="HBoxContainer" parent="MainMargin/MainLayout" unique_id=1358065412]
+layout_mode = 2
+
+[node name="CloseHint" type="Label" parent="MainMargin/MainLayout/BottomControls" unique_id=615731265]
+layout_mode = 2
+
+[node name="InventoryTitle" type="Label" parent="." unique_id=1125965604]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 3.0
+offset_top = 51.0
+offset_right = 3.0
+offset_bottom = 131.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.9098039, 0.8862745, 0.8156863, 1)
+theme_override_fonts/font = ExtResource("3_gpa2l")
+theme_override_font_sizes/font_size = 45
+text = "INVENTORY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="." unique_id=807167997]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+offset_left = 1050.0
+offset_top = 60.0
+offset_right = 1118.0
+offset_bottom = 94.0
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 0.16470589, 0.16470589, 1)
+theme_override_colors/font_focus_color = Color(1, 0.16470589, 0.16470589, 1)
+theme_override_colors/font_pressed_color = Color(0.47843137, 0.05882353, 0.05882353, 1)
+theme_override_colors/font_hover_color = Color(1, 0.16470589, 0.16470589, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("3_gpa2l")
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("StyleBoxEmpty_tgvcm")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_tu7mv")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_ukdvo")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_d080i")
+text = "✕"
