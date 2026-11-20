@@ -1,4 +1,4 @@
-extends Panel
+extends Button
 class_name InventorySlot
 
 signal slot_clicked(slot_index: int)
@@ -13,8 +13,15 @@ var is_selected: bool = false
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	selection_border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	toggle_mode = false             # selection is shown by the border, not by toggling
+	focus_mode = Control.FOCUS_NONE # no focus rectangle after clicking
+	text = ""
+
+	# Children must never swallow clicks meant for the button.
+	for child: Control in [item_icon, selection_border, quantity_label, slot_number]:
+		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	pressed.connect(_on_pressed)
 
 	clear_slot()
 	update_selection(false)
@@ -29,8 +36,9 @@ func set_item(texture: Texture2D, quantity: int = 1) -> void:
 	item_icon.texture = texture
 	item_icon.visible = texture != null
 
-	quantity_label.text = str(quantity) if quantity > 1 else ""
-	quantity_label.visible = quantity > 1
+	var show_quantity := texture != null and quantity > 1
+	quantity_label.text = str(quantity) if show_quantity else ""
+	quantity_label.visible = show_quantity
 
 
 func clear_slot() -> void:
@@ -46,8 +54,5 @@ func update_selection(selected: bool) -> void:
 	selection_border.visible = selected
 
 
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			slot_clicked.emit(slot_index)
-			accept_event()
+func _on_pressed() -> void:
+	slot_clicked.emit(slot_index)
