@@ -10,7 +10,6 @@
 [ext_resource type="Resource" uid="uid://cpw8607cmpmqq" path="res://src/audio/entries/footstep_sprint.tres" id="8_n5oej"]
 [ext_resource type="Resource" uid="uid://babk0nk31lpvr" path="res://src/audio/entries/door_open.tres" id="9_vyq05"]
 [ext_resource type="Resource" uid="uid://bx6h1ghcvwphg" path="res://src/audio/entries/door_close.tres" id="10_2n62l"]
-[ext_resource type="Resource" uid="uid://vhxjvd2g3q2o" path="res://src/audio/entries/game_over.tres" id="11_n5oej"]
 [ext_resource type="Resource" uid="uid://be2ma7867p06u" path="res://src/audio/entries/chase_sting.tres" id="12_vyq05"]
 [ext_resource type="Resource" uid="uid://fqmof0xsmb3s" path="res://src/audio/entries/entity_patrol.tres" id="13_vyq05"]
 [ext_resource type="Resource" uid="uid://boe4fii71hdft" path="res://src/audio/entries/entity_detect.tres" id="14_161er"]
@@ -20,4 +19,4 @@
 
 [node name="SoundManager" type="Node" unique_id=641939431]
 script = ExtResource("1_is24e")
-entries = Array[ExtResource("2_ilqm1")]([ExtResource("3_mneas"), ExtResource("4_c8c2r"), ExtResource("5_01xtf"), ExtResource("6_2n62l"), ExtResource("7_jv0it"), ExtResource("8_n5oej"), ExtResource("9_vyq05"), ExtResource("10_2n62l"), ExtResource("11_n5oej"), ExtResource("12_vyq05"), ExtResource("13_vyq05"), ExtResource("14_161er"), ExtResource("15_68hiy"), ExtResource("16_fo2bl"), ExtResource("17_olyaw"), null, null, null])
+entries = Array[ExtResource("2_ilqm1")]([ExtResource("3_mneas"), ExtResource("4_c8c2r"), ExtResource("5_01xtf"), ExtResource("6_2n62l"), ExtResource("7_jv0it"), ExtResource("8_n5oej"), ExtResource("9_vyq05"), ExtResource("10_2n62l"), ExtResource("12_vyq05"), ExtResource("13_vyq05"), ExtResource("14_161er"), ExtResource("15_68hiy"), ExtResource("16_fo2bl"), ExtResource("17_olyaw"), null, null, null])
