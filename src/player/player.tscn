@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://bcp6psyj4ip41" path="res://src/ui/static_overlay.gd" id="12_cwolq"]
 [ext_resource type="Script" uid="uid://cdbog3edwih6j" path="res://src/player/wake_up_sequence.gd" id="13_2smqc"]
 [ext_resource type="Script" uid="uid://bp5r2pchc270x" path="res://src/ui/gaze_distortion.gd" id="14_rl62b"]
+[ext_resource type="Script" uid="uid://jcoiyqql25ae" path="res://src/movement/step_climber.gd" id="15_wlj80"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 radius = 0.4
@@ -80,3 +81,8 @@ metadata/_custom_type_script = "uid://cdbog3edwih6j"
 [node name="GazeDistortion" type="CanvasLayer" parent="." unique_id=1528833129]
 script = ExtResource("14_rl62b")
 metadata/_custom_type_script = "uid://bp5r2pchc270x"
+
+[node name="StepClimber" type="Node" parent="." unique_id=1041425068]
+script = ExtResource("15_wlj80")
+feet_offset = 0.8
+metadata/_custom_type_script = "uid://jcoiyqql25ae"

@@ -9,9 +9,9 @@ const DEFAULT_SHADER: Shader = preload("res://src/ui/effects/static_vignette.gds
 @export var state_intensity: Dictionary = {
 	"Patrol": 0.0,
 	"Investigate": 0.12,
-	"Search": 0.2,
-	"Detect": 0.3,
-	"Chase": 0.5,
+	"Search": 0.1,
+	"Detect": 0.2,
+	"Chase": 0.4,
 }
 ## Intensity per second when getting stronger / weaker.
 @export var rise_speed: float = 4.0

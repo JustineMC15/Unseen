@@ -32,12 +32,14 @@ var _yaw_half_range: float = 0.0
 var _pitch_half_range: float = 0.0
 # Used in locker tween
 var _look_frozen: bool = false
+var _step_climber: StepClimber
 
 func _ready() -> void:
 	add_to_group("player")
 	add_to_group("saveable")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_camera_rest_position = camera.position
+	_step_climber = StepClimber.find_on(self)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not _look_frozen:
@@ -89,7 +91,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, current_speed)
 		velocity.z = move_toward(velocity.z, 0.0, current_speed)
-
+	if _step_climber:
+		_step_climber.apply(delta)
 	move_and_slide()
 	_update_head_bob(delta, sprinting)
 

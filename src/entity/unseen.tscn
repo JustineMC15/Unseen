@@ -10,28 +10,18 @@
 [ext_resource type="Script" uid="uid://decdehhfy0n0u" path="res://src/entity/entity_catch.gd" id="7_kpt7s"]
 [ext_resource type="Script" uid="uid://df440bt2vm7ih" path="res://src/entity/states/investigate_state.gd" id="8_yjbss"]
 [ext_resource type="Script" uid="uid://c3yk3cswja0fo" path="res://src/entity/location_tracker.gd" id="10_2io5g"]
+[ext_resource type="PackedScene" uid="uid://brbcvm4req14g" path="res://assets/models/entity/unseen.glb" id="10_306bh"]
 [ext_resource type="Script" uid="uid://m61vmol525ky" path="res://src/entity/entity_hearing.gd" id="11_306bh"]
+[ext_resource type="Script" uid="uid://rlhg0sbrgwwm" path="res://src/entity/entity_physics.gd" id="11_fyjew"]
+[ext_resource type="Script" uid="uid://jcoiyqql25ae" path="res://src/movement/step_climber.gd" id="14_fyjew"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_vlew8"]
 radius = 0.3
 height = 3.0
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bb53b"]
-radius = 1.0
+radius = 0.9
 height = 3.5
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bekt7"]
-albedo_color = Color(0.14364877, 0.142121, 0.26281515, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_vlew8"]
-height = 3.0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0bfa1"]
-albedo_color = Color(0.45364925, 0, 0, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_kpt7s"]
-radius = 0.05
-height = 0.1
 
 [node name="Unseen" type="CharacterBody3D" unique_id=1752703208 node_paths=PackedStringArray("perception", "state_machine", "nav_agent")]
 script = ExtResource("1_0bfa1")
@@ -43,11 +33,30 @@ nav_agent = NodePath("NavigationAgent3D")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 shape = SubResource("CapsuleShape3D_vlew8")
 
+[node name="unseen" parent="." unique_id=373125148 instance=ExtResource("10_306bh")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="EntityPhysics" type="Node" parent="unseen" unique_id=1451897692]
+script = ExtResource("11_fyjew")
+hair_stiffness = 2.5
+skirt_stiffness = 9.0
+skirt_drag = 0.05
+skirt_gravity = 0.25
+blouse_drag = 0.05
+metadata/_custom_type_script = "uid://rlhg0sbrgwwm"
+
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=484813096]
 debug_enabled = true
 
 [node name="Eyes" type="Node3D" parent="." unique_id=1575763648]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+
+[node name="Catch" type="Area3D" parent="." unique_id=561685482]
+script = ExtResource("7_kpt7s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Catch" unique_id=1423074448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CapsuleShape3D_bb53b")
 
 [node name="Perception" type="Node" parent="." unique_id=1833831182 node_paths=PackedStringArray("eyes")]
 script = ExtResource("1_51ugx")
@@ -71,25 +80,12 @@ script = ExtResource("7_bb53b")
 [node name="Investigate" type="Node" parent="StateMachine" unique_id=1420951932]
 script = ExtResource("8_yjbss")
 
-[node name="Catch" type="Area3D" parent="." unique_id=561685482]
-script = ExtResource("7_kpt7s")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Catch" unique_id=1423074448]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-shape = SubResource("CapsuleShape3D_bb53b")
-
-[node name="PlaceholderSprite" type="MeshInstance3D" parent="." unique_id=1224491861]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-material_override = SubResource("StandardMaterial3D_bekt7")
-mesh = SubResource("CapsuleMesh_vlew8")
-
-[node name="PlaceholderEyes" type="MeshInstance3D" parent="." unique_id=1009180017]
-transform = Transform3D(5, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -0.5)
-material_override = SubResource("StandardMaterial3D_0bfa1")
-mesh = SubResource("CapsuleMesh_kpt7s")
-
 [node name="Location" type="Node" parent="." unique_id=25828339]
 script = ExtResource("10_2io5g")
 
 [node name="Hearing" type="Node" parent="." unique_id=1156884217]
 script = ExtResource("11_306bh")
+
+[node name="StepClimber" type="Node" parent="." unique_id=1471114964]
+script = ExtResource("14_fyjew")
+metadata/_custom_type_script = "uid://jcoiyqql25ae"

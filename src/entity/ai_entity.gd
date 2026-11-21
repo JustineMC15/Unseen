@@ -40,6 +40,7 @@ var _move_direction: Vector3 = Vector3.ZERO
 
 var is_active: bool = true
 var _default_process_mode: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
+var step_climber: StepClimber
 
 func _ready() -> void:
 	_default_process_mode = process_mode
@@ -51,6 +52,8 @@ func _ready() -> void:
 			location = child as LocationTracker
 		elif child is EntityHearing:
 			hearing = child as EntityHearing
+		elif child is StepClimber:
+			step_climber = child as StepClimber
 	if location == null:
 		push_warning("AIEntity: add a LocationTracker child.")
 	if hearing:
@@ -139,6 +142,8 @@ func move_towards(target_position: Vector3, speed: float) -> void:
 		velocity.y = 0.0
 	else:
 		velocity.y -= _gravity * delta
+	if step_climber:
+		step_climber.apply(delta)
 	move_and_slide()
 
 func _flat_distance_to(point: Vector3) -> float:
